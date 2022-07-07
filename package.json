@@ -3,12 +3,18 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "animejs": "^3.2.1",
+    "esbuild": "^0.14.48",
+    "pixi.js": "^6.4.2",
+    "pubsub-js": "^1.9.4"
+  },
   "devDependencies": {
+    "@types/animejs": "^3.1.4",
     "prettier": "2.7.1"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "esbuild ts/app.ts --outfile=js/app.js --bundle --watch"
   },
   "keywords": [],
   "author": "",

@@ -1,82 +1,16 @@
-/* apply a natural box layout model to all elements, but allowing components to change */
-html {
-  box-sizing: border-box;
-}
-*,
-*:before,
-*:after {
-  box-sizing: inherit;
-}
+/* @font-face {
+  font-family: 'Ships Whistle';
+  src: url('fonts/ShipsWhistle-Bold.woff2') format('woff2');
+  font-weight: bold;
+} */
 
 #app {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   margin: 0 auto;
-  margin-top: 5em;
-  width: 31.5em;
-  height: 15em;
+  margin-top: 100px;
+  width: 800px;
+  height: 600px;
 }
 
-.board-bg {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  justify-content: center;
-}
-
-.slot {
-  margin: 0 1em;
-  padding-bottom: 0.25em;
-  border-bottom: 3px solid #ccc;
-  height: calc(3em + 5px);
-  width: 2.5em;
-}
-
-.board {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  transform: translateX(-50%);
-  width: 100%;
-  pointer-events: none;
-  overflow: visible;
-}
-
-.bank {
-  display: flex;
-  justify-content: center;
-  margin-top: 2em;
-}
-
-.tile {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 1em;
-  border: 0.15em solid black;
-  border-radius: 0.5em;
-  height: 3em;
-  width: 2.5em;
-  background-color: #7dc7ff;
-  box-shadow: 0 0.2em 0 black;
-}
-
-.tile span {
-  position: relative;
-  top: 0.03em;
-  font-family: 'Gintronic';
-  font-size: 2em;
-  font-weight: 300;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.tile:hover {
-  cursor: pointer;
-  background-color: #f3e470;
+#app > * {
+  max-width: 100%;
 }
