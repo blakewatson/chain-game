@@ -25,10 +25,11 @@ export default class Game {
   public boardBg: Container | null = null;
   public h: number = VIEW_H;
   public lastTime: number = 0;
-  public preventClicks = false;
+  public preventClicksPromises: Promise<any>[] = [];
   public ticker: Ticker | null = null;
   public tileEntryPoint: { x: number; y: number } = { x: 0, y: 0 };
   public w: number = VIEW_W;
+  public wordList: string[] = [];
 
   constructor(ticker: Ticker) {
     this.app = new Application({
@@ -56,10 +57,25 @@ export default class Game {
 
     this.ticker.add(this.update.bind(this));
     this.ticker.start();
+
+    this.wordList = JSON.parse(localStorage.getItem('chain-wordlist'));
   }
 
   public addChild(...children: DisplayObject[]) {
     this.app?.stage.addChild(...children);
+  }
+
+  public checkForWord() {
+    const board = this.board.map((tile) => tile.letter).join('');
+
+    for (let i = 0; i < this.wordList.length; i++) {
+      const word = this.wordList[i];
+
+      if (board.substring(0, word.length) === word) {
+        this.scoreWord(word);
+        break;
+      }
+    }
   }
 
   public initBank() {
@@ -111,11 +127,11 @@ export default class Game {
 
   public listenForTileClick() {
     PubSub.subscribe(TILE_CLICK, (msg: string, tile: Tile) => {
-      if (this.preventClicks) {
+      if (this.preventClicksPromises.length) {
         return;
       }
 
-      this.preventClicks = true;
+      const done = this.preventClicksRequest();
 
       const animations = [];
 
@@ -136,15 +152,14 @@ export default class Game {
       // animate other tiles on the board
       this.board.forEach((boardTile: Tile, i: number) => {
         if (this.board.length === 7 && i === 0) {
-          boardTile.exitAnimation();
+          boardTile.animationExit();
           return;
         }
-        animations.push(boardTile.shiftLeft());
+        animations.push(boardTile.animationShiftLeft());
       });
 
       Promise.all(animations.map((a) => a.finished)).then(() => {
-        console.log('animationComplete');
-        this.preventClicks = false;
+        done();
       });
 
       // add tile to the board
@@ -152,6 +167,10 @@ export default class Game {
 
       if (this.board.length > 7) {
         this.board.shift();
+      }
+
+      if (this.board.length === 7) {
+        this.checkForWord();
       }
 
       // generate new letter tile in place of the one that was just played
@@ -165,6 +184,34 @@ export default class Game {
 
       this.bank.addChild(newTile);
     });
+  }
+
+  public preventClicksRequest() {
+    let done: Function | undefined;
+
+    const request = new Promise((resolve, reject) => {
+      done = resolve;
+    });
+
+    request.then(() => {
+      this.preventClicksPromises = this.preventClicksPromises.filter(
+        (req) => req !== request
+      );
+    });
+
+    this.preventClicksPromises.push(request);
+
+    return done;
+  }
+
+  public scoreWord(word: string) {
+    // animate word
+    const tiles = this.board.slice(0, word.length);
+    const done = this.preventClicksRequest();
+    const successAnimations = tiles.map(
+      (tile) => tile.animationSuccess().finished
+    );
+    Promise.all(successAnimations).then(() => done());
   }
 
   public update(dt: number) {}

@@ -8,6 +8,10 @@
   var __commonJS = (cb, mod) => function __require() {
     return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
   };
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
   var __copyProps = (to, from, except, desc) => {
     if (from && typeof from === "object" || typeof from === "function") {
       for (let key of __getOwnPropNames(from))
@@ -754,7 +758,7 @@
         function error(type) {
           throw RangeError(errors[type]);
         }
-        function map2(array, fn) {
+        function map3(array, fn) {
           var length = array.length;
           var result = [];
           while (length--) {
@@ -771,7 +775,7 @@
           }
           string = string.replace(regexSeparators, ".");
           var labels = string.split(".");
-          var encoded = map2(labels, fn).join(".");
+          var encoded = map3(labels, fn).join(".");
           return result + encoded;
         }
         function ucs2decode(string) {
@@ -793,7 +797,7 @@
           return output;
         }
         function ucs2encode(array) {
-          return map2(array, function(value) {
+          return map3(array, function(value) {
             var output = "";
             if (value > 65535) {
               value -= 65536;
@@ -2122,6 +2126,48 @@
     globalThis.Int32Array = Array;
   }
 
+  // node_modules/@pixi/utils/dist/esm/utils.js
+  var utils_exports = {};
+  __export(utils_exports, {
+    BaseTextureCache: () => BaseTextureCache,
+    CanvasRenderTarget: () => CanvasRenderTarget,
+    DATA_URI: () => DATA_URI,
+    EventEmitter: () => import_eventemitter3.default,
+    ProgramCache: () => ProgramCache,
+    TextureCache: () => TextureCache,
+    clearTextureCache: () => clearTextureCache,
+    correctBlendMode: () => correctBlendMode,
+    createIndicesForQuads: () => createIndicesForQuads,
+    decomposeDataUri: () => decomposeDataUri,
+    deprecation: () => deprecation,
+    destroyTextureCache: () => destroyTextureCache,
+    determineCrossOrigin: () => determineCrossOrigin,
+    earcut: () => import_earcut.default,
+    getBufferType: () => getBufferType,
+    getResolutionOfUrl: () => getResolutionOfUrl,
+    hex2rgb: () => hex2rgb,
+    hex2string: () => hex2string,
+    interleaveTypedArrays: () => interleaveTypedArrays,
+    isMobile: () => isMobile2,
+    isPow2: () => isPow2,
+    isWebGLSupported: () => isWebGLSupported,
+    log2: () => log2,
+    nextPow2: () => nextPow2,
+    premultiplyBlendMode: () => premultiplyBlendMode,
+    premultiplyRgba: () => premultiplyRgba,
+    premultiplyTint: () => premultiplyTint,
+    premultiplyTintToRgba: () => premultiplyTintToRgba,
+    removeItems: () => removeItems,
+    rgb2hex: () => rgb2hex,
+    sayHello: () => sayHello,
+    sign: () => sign,
+    skipHello: () => skipHello,
+    string2hex: () => string2hex,
+    trimCanvas: () => trimCanvas,
+    uid: () => uid,
+    url: () => url
+  });
+
   // node_modules/ismobilejs/esm/isMobile.js
   var appleIphone = /iPhone/i;
   var appleIpod = /iPod/i;
@@ -2665,6 +2711,9 @@
   settings.FAIL_IF_MAJOR_PERFORMANCE_CAVEAT = false;
   var saidHello = false;
   var VERSION = "6.4.2";
+  function skipHello() {
+    saidHello = true;
+  }
   function sayHello(type) {
     var _a3;
     if (saidHello) {
@@ -3040,6 +3089,9 @@
     }
     return parseInt(string, 16);
   }
+  function rgb2hex(rgb) {
+    return (rgb[0] * 255 << 16) + (rgb[1] * 255 << 8) + (rgb[2] * 255 | 0);
+  }
   function mapPremultipliedBlendModes() {
     var pm = [];
     var npm = [];
@@ -3142,6 +3194,35 @@
     }
     return null;
   }
+  var map = { Float32Array, Uint32Array, Int32Array, Uint8Array };
+  function interleaveTypedArrays(arrays, sizes) {
+    var outSize = 0;
+    var stride = 0;
+    var views = {};
+    for (var i = 0; i < arrays.length; i++) {
+      stride += sizes[i];
+      outSize += arrays[i].length;
+    }
+    var buffer = new ArrayBuffer(outSize * 4);
+    var out = null;
+    var littleOffset = 0;
+    for (var i = 0; i < arrays.length; i++) {
+      var size = sizes[i];
+      var array = arrays[i];
+      var type = getBufferType(array);
+      if (!views[type]) {
+        views[type] = new map[type](buffer);
+      }
+      out = views[type];
+      for (var j = 0; j < array.length; j++) {
+        var indexStart = (j / size | 0) * stride + littleOffset;
+        var index = j % size;
+        out[indexStart + index] = array[j];
+      }
+      littleOffset += size;
+    }
+    return new Float32Array(buffer);
+  }
   function nextPow2(v) {
     v += v === 0 ? 1 : 0;
     --v;
@@ -3219,6 +3300,24 @@
   var ProgramCache = {};
   var TextureCache = /* @__PURE__ */ Object.create(null);
   var BaseTextureCache = /* @__PURE__ */ Object.create(null);
+  function destroyTextureCache() {
+    var key;
+    for (key in TextureCache) {
+      TextureCache[key].destroy();
+    }
+    for (key in BaseTextureCache) {
+      BaseTextureCache[key].destroy();
+    }
+  }
+  function clearTextureCache() {
+    var key;
+    for (key in TextureCache) {
+      delete TextureCache[key];
+    }
+    for (key in BaseTextureCache) {
+      delete BaseTextureCache[key];
+    }
+  }
   var CanvasRenderTarget = function() {
     function CanvasRenderTarget2(width, height, resolution) {
       this.canvas = document.createElement("canvas");
@@ -3311,6 +3410,20 @@
       width,
       data
     };
+  }
+  var DATA_URI = /^\s*data:(?:([\w-]+)\/([\w+.-]+))?(?:;charset=([\w-]+))?(?:;(base64))?,(.*)/i;
+  function decomposeDataUri(dataUri) {
+    var dataUriMatch = DATA_URI.exec(dataUri);
+    if (dataUriMatch) {
+      return {
+        mediaType: dataUriMatch[1] ? dataUriMatch[1].toLowerCase() : void 0,
+        subType: dataUriMatch[2] ? dataUriMatch[2].toLowerCase() : void 0,
+        charset: dataUriMatch[3] ? dataUriMatch[3].toLowerCase() : void 0,
+        encoding: dataUriMatch[4] ? dataUriMatch[4].toLowerCase() : void 0,
+        data: dataUriMatch[5]
+      };
+    }
+    return void 0;
   }
   var tempAnchor;
   function determineCrossOrigin(url$1, loc) {
@@ -9171,7 +9284,7 @@
     Int32Array,
     Uint8Array
   };
-  function interleaveTypedArrays(arrays, sizes) {
+  function interleaveTypedArrays2(arrays, sizes) {
     var outSize = 0;
     var stride = 0;
     var views = {};
@@ -9201,7 +9314,7 @@
   }
   var byteSizeMap$1 = { 5126: 4, 5123: 2, 5121: 1 };
   var UID$3 = 0;
-  var map = {
+  var map2 = {
     Float32Array,
     Uint32Array,
     Int32Array,
@@ -9299,7 +9412,7 @@
         sizes.push(attribute.size * byteSizeMap$1[attribute.type] / 4);
         attribute.buffer = 0;
       }
-      interleavedBuffer.data = interleaveTypedArrays(arrays, sizes);
+      interleavedBuffer.data = interleaveTypedArrays2(arrays, sizes);
       for (i = 0; i < this.buffers.length; i++) {
         if (this.buffers[i] !== this.indexBuffer) {
           this.buffers[i].destroy();
@@ -9358,7 +9471,7 @@
         }
       }
       for (var i = 0; i < geometry.buffers.length; i++) {
-        arrays[i] = new map[getBufferType(geometry.buffers[i].data)](sizes[i]);
+        arrays[i] = new map2[getBufferType(geometry.buffers[i].data)](sizes[i]);
         geometryOut.buffers[i] = new Buffer2(arrays[i]);
       }
       for (var i = 0; i < geometries.length; i++) {
@@ -15754,14 +15867,14 @@
   var STATUS_TYPE_OK = 2;
   function _noop$1() {
   }
-  function setExtMap(map2, extname, val) {
+  function setExtMap(map3, extname, val) {
     if (extname && extname.indexOf(".") === 0) {
       extname = extname.substring(1);
     }
     if (!extname) {
       return;
     }
-    map2[extname] = val;
+    map3[extname] = val;
   }
   function reqType(xhr) {
     return xhr.toString().replace("object ", "");
@@ -20495,20 +20608,20 @@
     "system-ui"
   ];
   var TextStyle = function() {
-    function TextStyle2(style) {
+    function TextStyle3(style) {
       this.styleID = 0;
       this.reset();
       deepCopyProperties(this, style, style);
     }
-    TextStyle2.prototype.clone = function() {
+    TextStyle3.prototype.clone = function() {
       var clonedProperties = {};
       deepCopyProperties(clonedProperties, this, defaultStyle);
-      return new TextStyle2(clonedProperties);
+      return new TextStyle3(clonedProperties);
     };
-    TextStyle2.prototype.reset = function() {
+    TextStyle3.prototype.reset = function() {
       deepCopyProperties(this, defaultStyle, defaultStyle);
     };
-    Object.defineProperty(TextStyle2.prototype, "align", {
+    Object.defineProperty(TextStyle3.prototype, "align", {
       get: function() {
         return this._align;
       },
@@ -20521,7 +20634,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "breakWords", {
+    Object.defineProperty(TextStyle3.prototype, "breakWords", {
       get: function() {
         return this._breakWords;
       },
@@ -20534,7 +20647,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "dropShadow", {
+    Object.defineProperty(TextStyle3.prototype, "dropShadow", {
       get: function() {
         return this._dropShadow;
       },
@@ -20547,7 +20660,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "dropShadowAlpha", {
+    Object.defineProperty(TextStyle3.prototype, "dropShadowAlpha", {
       get: function() {
         return this._dropShadowAlpha;
       },
@@ -20560,7 +20673,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "dropShadowAngle", {
+    Object.defineProperty(TextStyle3.prototype, "dropShadowAngle", {
       get: function() {
         return this._dropShadowAngle;
       },
@@ -20573,7 +20686,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "dropShadowBlur", {
+    Object.defineProperty(TextStyle3.prototype, "dropShadowBlur", {
       get: function() {
         return this._dropShadowBlur;
       },
@@ -20586,7 +20699,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "dropShadowColor", {
+    Object.defineProperty(TextStyle3.prototype, "dropShadowColor", {
       get: function() {
         return this._dropShadowColor;
       },
@@ -20600,7 +20713,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "dropShadowDistance", {
+    Object.defineProperty(TextStyle3.prototype, "dropShadowDistance", {
       get: function() {
         return this._dropShadowDistance;
       },
@@ -20613,7 +20726,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "fill", {
+    Object.defineProperty(TextStyle3.prototype, "fill", {
       get: function() {
         return this._fill;
       },
@@ -20627,7 +20740,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "fillGradientType", {
+    Object.defineProperty(TextStyle3.prototype, "fillGradientType", {
       get: function() {
         return this._fillGradientType;
       },
@@ -20640,7 +20753,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "fillGradientStops", {
+    Object.defineProperty(TextStyle3.prototype, "fillGradientStops", {
       get: function() {
         return this._fillGradientStops;
       },
@@ -20653,7 +20766,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "fontFamily", {
+    Object.defineProperty(TextStyle3.prototype, "fontFamily", {
       get: function() {
         return this._fontFamily;
       },
@@ -20666,7 +20779,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "fontSize", {
+    Object.defineProperty(TextStyle3.prototype, "fontSize", {
       get: function() {
         return this._fontSize;
       },
@@ -20679,7 +20792,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "fontStyle", {
+    Object.defineProperty(TextStyle3.prototype, "fontStyle", {
       get: function() {
         return this._fontStyle;
       },
@@ -20692,7 +20805,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "fontVariant", {
+    Object.defineProperty(TextStyle3.prototype, "fontVariant", {
       get: function() {
         return this._fontVariant;
       },
@@ -20705,7 +20818,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "fontWeight", {
+    Object.defineProperty(TextStyle3.prototype, "fontWeight", {
       get: function() {
         return this._fontWeight;
       },
@@ -20718,7 +20831,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "letterSpacing", {
+    Object.defineProperty(TextStyle3.prototype, "letterSpacing", {
       get: function() {
         return this._letterSpacing;
       },
@@ -20731,7 +20844,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "lineHeight", {
+    Object.defineProperty(TextStyle3.prototype, "lineHeight", {
       get: function() {
         return this._lineHeight;
       },
@@ -20744,7 +20857,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "leading", {
+    Object.defineProperty(TextStyle3.prototype, "leading", {
       get: function() {
         return this._leading;
       },
@@ -20757,7 +20870,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "lineJoin", {
+    Object.defineProperty(TextStyle3.prototype, "lineJoin", {
       get: function() {
         return this._lineJoin;
       },
@@ -20770,7 +20883,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "miterLimit", {
+    Object.defineProperty(TextStyle3.prototype, "miterLimit", {
       get: function() {
         return this._miterLimit;
       },
@@ -20783,7 +20896,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "padding", {
+    Object.defineProperty(TextStyle3.prototype, "padding", {
       get: function() {
         return this._padding;
       },
@@ -20796,7 +20909,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "stroke", {
+    Object.defineProperty(TextStyle3.prototype, "stroke", {
       get: function() {
         return this._stroke;
       },
@@ -20810,7 +20923,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "strokeThickness", {
+    Object.defineProperty(TextStyle3.prototype, "strokeThickness", {
       get: function() {
         return this._strokeThickness;
       },
@@ -20823,7 +20936,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "textBaseline", {
+    Object.defineProperty(TextStyle3.prototype, "textBaseline", {
       get: function() {
         return this._textBaseline;
       },
@@ -20836,7 +20949,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "trim", {
+    Object.defineProperty(TextStyle3.prototype, "trim", {
       get: function() {
         return this._trim;
       },
@@ -20849,7 +20962,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "whiteSpace", {
+    Object.defineProperty(TextStyle3.prototype, "whiteSpace", {
       get: function() {
         return this._whiteSpace;
       },
@@ -20862,7 +20975,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "wordWrap", {
+    Object.defineProperty(TextStyle3.prototype, "wordWrap", {
       get: function() {
         return this._wordWrap;
       },
@@ -20875,7 +20988,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle2.prototype, "wordWrapWidth", {
+    Object.defineProperty(TextStyle3.prototype, "wordWrapWidth", {
       get: function() {
         return this._wordWrapWidth;
       },
@@ -20888,7 +21001,7 @@
       enumerable: false,
       configurable: true
     });
-    TextStyle2.prototype.toFontString = function() {
+    TextStyle3.prototype.toFontString = function() {
       var fontSizeString = typeof this.fontSize === "number" ? this.fontSize + "px" : this.fontSize;
       var fontFamilies = this.fontFamily;
       if (!Array.isArray(this.fontFamily)) {
@@ -20903,7 +21016,7 @@
       }
       return this.fontStyle + " " + this.fontVariant + " " + this.fontWeight + " " + fontSizeString + " " + fontFamilies.join(",");
     };
-    return TextStyle2;
+    return TextStyle3;
   }();
   function getSingleColor(color) {
     if (typeof color === "number") {
@@ -27932,6 +28045,27 @@ void main() {
 
   // ts/Tile.ts
   var import_pubsub_js = __toESM(require_pubsub());
+
+  // ts/utils.ts
+  var getRandomLetter = (vowelsOnly = false) => {
+    const alpha = [];
+    if (vowelsOnly) {
+      alpha.push("a", "e", "i", "o", "u");
+    } else {
+      alpha.push(..."abcdefghijklmnopqrstuvwxyz".split(""));
+    }
+    const i = Math.floor(Math.random() * alpha.length);
+    return alpha[i];
+  };
+  function rgbFunctionToHex(rgba, asNumber) {
+    const parts = rgba.slice(5, -1).split(",").slice(0, -1).map((_) => parseInt(_) / 255);
+    if (asNumber) {
+      return utils_exports.rgb2hex(parts);
+    }
+    return utils_exports.hex2string(utils_exports.rgb2hex(parts));
+  }
+
+  // ts/Tile.ts
   var SHADOW_Y2 = 6;
   var TILE_W2 = 60;
   var TILE_H2 = 65 + SHADOW_Y2;
@@ -27945,6 +28079,7 @@ void main() {
       this.letter = "";
       this.shadow = null;
       this.text = null;
+      this.textStyle = {};
       this.interactive = options.clickable;
       this.buttonMode = options.clickable;
       this.letter = options.letter;
@@ -27954,13 +28089,15 @@ void main() {
       this.y = options.y;
       this.bg = new Graphics();
       this.applyTileBackground();
-      this.shadow = this.getShadow();
+      this.shadow = new Graphics();
+      this.applyShadow();
       this.text = this.getText();
+      this.applyTextStyle();
       this.addChild(this.shadow);
       this.addChild(this.bg);
       this.addChild(this.text);
       if (options.animateIn) {
-        this.enterAnimation();
+        this.animationEnter();
       }
       const self2 = this;
       this.addListener("pointerover", () => this.onHover());
@@ -27969,13 +28106,30 @@ void main() {
         import_pubsub_js.default.publish(TILE_CLICK, this);
       });
     }
-    applyTileBackground() {
-      this.bg.lineStyle(1, 7561728);
-      this.bg.beginTextureFill({ texture: this.gradient("#fff600", "#D1AB00") });
+    applyShadow(color = 7561728) {
+      this.shadow.clear();
+      this.shadow.lineStyle(1, color);
+      this.shadow.beginFill(color);
+      this.shadow.drawRoundedRect(0, SHADOW_Y2, TILE_W2, TILE_H2, 12);
+      this.shadow.endFill();
+    }
+    applyTextStyle(color = "#736200") {
+      this.text.style = {
+        fontFamily: "Ships Whistle",
+        fontSize: 60,
+        fontWeight: "bold",
+        align: "center",
+        fill: color
+      };
+    }
+    applyTileBackground(colorOne = "#fff600", colorTwo = "#D1AB00", lineColor = 7561728) {
+      this.bg.clear();
+      this.bg.lineStyle(1, lineColor);
+      this.bg.beginTextureFill({ texture: this.gradient(colorOne, colorTwo) });
       this.bg.drawRoundedRect(0, 0, TILE_W2, TILE_H2, 12);
       this.bg.endFill();
     }
-    enterAnimation() {
+    animationEnter() {
       this.alpha = 0;
       this.scale.set(0, 0);
       anime_es_default({
@@ -27994,9 +28148,9 @@ void main() {
         }
       });
     }
-    exitAnimation() {
+    animationExit() {
       return new Promise((resolve3, reject2) => {
-        this.shiftLeft().finished.then(() => {
+        this.animationShiftLeft().finished.then(() => {
           anime_es_default({
             targets: {
               x: this.x,
@@ -28005,7 +28159,7 @@ void main() {
               alpha: this.alpha
             },
             y: {
-              value: "+=200",
+              value: "+=600",
               easing: "easeInSine"
             },
             angle: -45,
@@ -28017,29 +28171,53 @@ void main() {
               this.x = obj.x;
               this.y = obj.y;
               this.angle = obj.angle;
-              this.alpha = obj.alpha;
             },
             complete: (anim) => resolve3(anim)
           });
         });
       });
     }
-    getShadow() {
-      const shadow = new Graphics();
-      shadow.lineStyle(1, 7561728);
-      shadow.beginFill(7561728);
-      shadow.drawRoundedRect(0, SHADOW_Y2, TILE_W2, TILE_H2, 12);
-      shadow.endFill();
-      return shadow;
+    animationShiftLeft() {
+      return anime_es_default({
+        targets: {
+          x: this.x
+        },
+        x: this.x - SLOT_W * 1.125,
+        duration: 400,
+        update: (anim) => {
+          const obj = anim.animatables[0].target;
+          this.x = obj.x;
+        }
+      });
+    }
+    animationSuccess() {
+      return anime_es_default({
+        targets: {
+          topColor: "#fff600",
+          bottomColor: "#D1AB00",
+          textColor: "#736200",
+          y: this.y
+        },
+        topColor: "#38FF38",
+        bottomColor: "#139A13",
+        textColor: "#073807",
+        y: "-=50",
+        duration: 300,
+        endDelay: 500,
+        easing: "easeInOutQuart",
+        direction: "alternate",
+        loop: 1,
+        update: (anim) => {
+          const obj = anim.animatables[0].target;
+          this.applyTileBackground(rgbFunctionToHex(obj.topColor), rgbFunctionToHex(obj.bottomColor));
+          this.applyShadow(rgbFunctionToHex(obj.textColor, true));
+          this.applyTextStyle(obj.textColor);
+          this.y = obj.y;
+        }
+      });
     }
     getText() {
-      const text = new Text(this.letter.toUpperCase(), {
-        fontFamily: "Ships Whistle",
-        fontSize: 60,
-        fontWeight: "bold",
-        align: "center",
-        fill: "#8c7800"
-      });
+      const text = new Text(this.letter.toUpperCase());
       text.resolution = window.devicePixelRatio || 1;
       text.anchor.set(0.5);
       text.x = TILE_W2 / 2;
@@ -28076,11 +28254,7 @@ void main() {
       });
     }
     onHover() {
-      this.bg.clear();
-      this.bg.lineStyle(1, 7561728);
-      this.bg.beginTextureFill({ texture: this.gradient("#FFFDC2", "#FFDA35") });
-      this.bg.drawRoundedRect(0, 0, TILE_W2, TILE_H2, 12);
-      this.bg.endFill();
+      this.applyTileBackground("#FFFDC2", "#FFDA35");
     }
     setClickable(value) {
       this.interactive = value;
@@ -28089,31 +28263,6 @@ void main() {
         this.applyTileBackground();
       }
     }
-    shiftLeft() {
-      return anime_es_default({
-        targets: {
-          x: this.x
-        },
-        x: this.x - SLOT_W * 1.125,
-        duration: 400,
-        update: (anim) => {
-          const obj = anim.animatables[0].target;
-          this.x = obj.x;
-        }
-      });
-    }
-  };
-
-  // ts/utils.ts
-  var getRandomLetter = (vowelsOnly = false) => {
-    const alpha = [];
-    if (vowelsOnly) {
-      alpha.push("a", "e", "i", "o", "u");
-    } else {
-      alpha.push(..."abcdefghijklmnopqrstuvwxyz".split(""));
-    }
-    const i = Math.floor(Math.random() * alpha.length);
-    return alpha[i];
   };
 
   // ts/Game.ts
@@ -28125,10 +28274,11 @@ void main() {
       this.boardBg = null;
       this.h = VIEW_H;
       this.lastTime = 0;
-      this.preventClicks = false;
+      this.preventClicksPromises = [];
       this.ticker = null;
       this.tileEntryPoint = { x: 0, y: 0 };
       this.w = VIEW_W;
+      this.wordList = [];
       this.app = new Application({
         width: VIEW_W,
         height: VIEW_H,
@@ -28147,9 +28297,20 @@ void main() {
       this.listenForTileClick();
       this.ticker.add(this.update.bind(this));
       this.ticker.start();
+      this.wordList = JSON.parse(localStorage.getItem("chain-wordlist"));
     }
     addChild(...children) {
       this.app?.stage.addChild(...children);
+    }
+    checkForWord() {
+      const board = this.board.map((tile) => tile.letter).join("");
+      for (let i = 0; i < this.wordList.length; i++) {
+        const word = this.wordList[i];
+        if (board.substring(0, word.length) === word) {
+          this.scoreWord(word);
+          break;
+        }
+      }
     }
     initBank() {
       this.bank = new Container();
@@ -28190,10 +28351,10 @@ void main() {
     }
     listenForTileClick() {
       import_pubsub_js2.default.subscribe(TILE_CLICK, (msg, tile) => {
-        if (this.preventClicks) {
+        if (this.preventClicksPromises.length) {
           return;
         }
-        this.preventClicks = true;
+        const done = this.preventClicksRequest();
         const animations = [];
         const currentPosition = {
           x: tile.x,
@@ -28203,18 +28364,20 @@ void main() {
         tile.setClickable(false);
         this.board.forEach((boardTile, i) => {
           if (this.board.length === 7 && i === 0) {
-            boardTile.exitAnimation();
+            boardTile.animationExit();
             return;
           }
-          animations.push(boardTile.shiftLeft());
+          animations.push(boardTile.animationShiftLeft());
         });
         Promise.all(animations.map((a) => a.finished)).then(() => {
-          console.log("animationComplete");
-          this.preventClicks = false;
+          done();
         });
         this.board.push(tile);
         if (this.board.length > 7) {
           this.board.shift();
+        }
+        if (this.board.length === 7) {
+          this.checkForWord();
         }
         const newTile = new Tile({
           letter: getRandomLetter(),
@@ -28226,21 +28389,59 @@ void main() {
         this.bank.addChild(newTile);
       });
     }
+    preventClicksRequest() {
+      let done;
+      const request = new Promise((resolve3, reject2) => {
+        done = resolve3;
+      });
+      request.then(() => {
+        this.preventClicksPromises = this.preventClicksPromises.filter((req) => req !== request);
+      });
+      this.preventClicksPromises.push(request);
+      return done;
+    }
+    scoreWord(word) {
+      const tiles = this.board.slice(0, word.length);
+      const done = this.preventClicksRequest();
+      const successAnimations = tiles.map((tile) => tile.animationSuccess().finished);
+      Promise.all(successAnimations).then(() => done());
+    }
     update(dt) {
     }
   };
 
   // ts/app.ts
   var fontFace = new FontFace("Ships Whistle", "url(../fonts/ShipsWhistle-Bold.woff2");
-  fontFace.load().then((font) => {
+  var fontFacePromise = fontFace.load();
+  fontFacePromise.then((font) => {
     document.fonts.add(font);
-    main();
   });
+  var wordListPromise = getWordList();
+  Promise.all([fontFacePromise, wordListPromise]).then(() => main());
   function main() {
     const ticker = Ticker.shared;
     ticker.autoStart = false;
     ticker.stop();
     const game = new Game(ticker);
+  }
+  async function getWordList() {
+    if (localStorage.getItem("chain-wordlist")) {
+      return;
+    }
+    try {
+      const resp = await fetch("all-words-alpha.txt");
+      const data = await resp.text();
+      const words = data.split("\n").filter((w) => {
+        if (!w || w.length < 3 || w.length > 7) {
+          return false;
+        }
+        return true;
+      });
+      words.sort((a, b) => b.length - a.length);
+      localStorage.setItem("chain-wordlist", JSON.stringify(words));
+    } catch (err) {
+      console.error(err);
+    }
   }
 })();
 /*

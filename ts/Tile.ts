@@ -1,7 +1,8 @@
 import anime from 'animejs';
-import { Container, Graphics, IPoint, Text, Texture } from 'pixi.js';
+import { Container, Graphics, IPoint, Text, TextStyle, Texture } from 'pixi.js';
 import PubSub from 'pubsub-js';
 import { SLOT_W, TILE_CLICK } from './constants';
+import { rgbFunctionToHex } from './utils';
 
 const SHADOW_Y = 6;
 const TILE_W = 60;
@@ -23,6 +24,7 @@ export default class Tile extends Container {
   public letter = '';
   public shadow: Graphics | null = null;
   public text: Text | null = null;
+  public textStyle: Partial<TextStyle> = {};
 
   public constructor(options: ITileOptions) {
     super();
@@ -42,10 +44,12 @@ export default class Tile extends Container {
     this.applyTileBackground();
 
     // create the shadow
-    this.shadow = this.getShadow();
+    this.shadow = new Graphics();
+    this.applyShadow();
 
     // create the letter
     this.text = this.getText();
+    this.applyTextStyle();
 
     // add objects to container
     this.addChild(this.shadow);
@@ -54,7 +58,7 @@ export default class Tile extends Container {
 
     // animate entrance if necessary
     if (options.animateIn) {
-      this.enterAnimation();
+      this.animationEnter();
     }
 
     // mouse events
@@ -66,14 +70,37 @@ export default class Tile extends Container {
     });
   }
 
-  public applyTileBackground() {
-    this.bg.lineStyle(1, 0x736200);
-    this.bg.beginTextureFill({ texture: this.gradient('#fff600', '#D1AB00') });
+  public applyShadow(color = 0x736200) {
+    this.shadow.clear();
+    this.shadow.lineStyle(1, color);
+    this.shadow.beginFill(color);
+    this.shadow.drawRoundedRect(0, SHADOW_Y, TILE_W, TILE_H, 12);
+    this.shadow.endFill();
+  }
+
+  public applyTextStyle(color = '#736200') {
+    this.text.style = {
+      fontFamily: 'Ships Whistle',
+      fontSize: 60,
+      fontWeight: 'bold',
+      align: 'center',
+      fill: color
+    };
+  }
+
+  public applyTileBackground(
+    colorOne = '#fff600',
+    colorTwo = '#D1AB00',
+    lineColor = 0x736200
+  ) {
+    this.bg.clear();
+    this.bg.lineStyle(1, lineColor);
+    this.bg.beginTextureFill({ texture: this.gradient(colorOne, colorTwo) });
     this.bg.drawRoundedRect(0, 0, TILE_W, TILE_H, 12);
     this.bg.endFill();
   }
 
-  public enterAnimation() {
+  public animationEnter() {
     // setup
     this.alpha = 0;
     this.scale.set(0, 0);
@@ -96,9 +123,9 @@ export default class Tile extends Container {
     });
   }
 
-  public exitAnimation() {
+  public animationExit() {
     return new Promise((resolve, reject) => {
-      this.shiftLeft().finished.then(() => {
+      this.animationShiftLeft().finished.then(() => {
         anime({
           targets: {
             x: this.x,
@@ -111,7 +138,7 @@ export default class Tile extends Container {
           //   easing: 'easeOutSine'
           // },
           y: {
-            value: '+=200',
+            value: '+=600',
             easing: 'easeInSine'
           },
           angle: -45,
@@ -124,7 +151,7 @@ export default class Tile extends Container {
             this.x = obj.x;
             this.y = obj.y;
             this.angle = obj.angle;
-            this.alpha = obj.alpha;
+            //this.alpha = obj.alpha;
           },
 
           complete: (anim) => resolve(anim)
@@ -133,24 +160,53 @@ export default class Tile extends Container {
     });
   }
 
-  public getShadow() {
-    const shadow = new Graphics();
-    shadow.lineStyle(1, 0x736200);
-    shadow.beginFill(0x736200);
-    shadow.drawRoundedRect(0, SHADOW_Y, TILE_W, TILE_H, 12);
-    shadow.endFill();
-    return shadow;
+  public animationShiftLeft() {
+    return anime({
+      targets: {
+        x: this.x
+      },
+      x: this.x - SLOT_W * 1.125,
+      duration: 400,
+      update: (anim) => {
+        const obj = anim.animatables[0].target as unknown as IPoint;
+        this.x = obj.x;
+      }
+    });
+  }
+
+  public animationSuccess() {
+    return anime({
+      targets: {
+        topColor: '#fff600',
+        bottomColor: '#D1AB00',
+        textColor: '#736200',
+        y: this.y
+      },
+      topColor: '#38FF38',
+      bottomColor: '#139A13',
+      textColor: '#073807',
+      y: '-=50',
+      duration: 300,
+      endDelay: 500,
+      easing: 'easeInOutQuart',
+      direction: 'alternate',
+      loop: 1,
+      update: (anim) => {
+        const obj = anim.animatables[0].target as any;
+
+        this.applyTileBackground(
+          rgbFunctionToHex(obj.topColor),
+          rgbFunctionToHex(obj.bottomColor)
+        );
+        this.applyShadow(rgbFunctionToHex(obj.textColor, true));
+        this.applyTextStyle(obj.textColor);
+        this.y = obj.y;
+      }
+    });
   }
 
   public getText() {
-    const text = new Text(this.letter.toUpperCase(), {
-      fontFamily: 'Ships Whistle',
-      fontSize: 60,
-      fontWeight: 'bold',
-      align: 'center',
-      fill: '#8c7800'
-    });
-
+    const text = new Text(this.letter.toUpperCase());
     text.resolution = window.devicePixelRatio || 1;
     text.anchor.set(0.5);
     text.x = TILE_W / 2;
@@ -196,11 +252,7 @@ export default class Tile extends Container {
   }
 
   public onHover() {
-    this.bg.clear();
-    this.bg.lineStyle(1, 0x736200);
-    this.bg.beginTextureFill({ texture: this.gradient('#FFFDC2', '#FFDA35') });
-    this.bg.drawRoundedRect(0, 0, TILE_W, TILE_H, 12);
-    this.bg.endFill();
+    this.applyTileBackground('#FFFDC2', '#FFDA35');
   }
 
   public setClickable(value: boolean) {
@@ -210,19 +262,5 @@ export default class Tile extends Container {
     if (!value) {
       this.applyTileBackground();
     }
-  }
-
-  public shiftLeft() {
-    return anime({
-      targets: {
-        x: this.x
-      },
-      x: this.x - SLOT_W * 1.125,
-      duration: 400,
-      update: (anim) => {
-        const obj = anim.animatables[0].target as unknown as IPoint;
-        this.x = obj.x;
-      }
-    });
   }
 }
