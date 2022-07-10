@@ -32,7 +32,7 @@ export default class Game {
   public score = 0;
   public ticker: Ticker | null = null;
   public tileEntryPoint: { x: number; y: number } = { x: 0, y: 0 };
-  public turns = 100;
+  public turns = 75;
   public w: number = VIEW_W;
   public wordList: string[] = [];
 
@@ -79,19 +79,26 @@ export default class Game {
     this.app?.stage.addChild(...children);
   }
 
-  public checkForWord() {
+  public async checkForWord(start = 0) {
     const board = this.board.map((tile) => tile.letter).join('');
+    console.log('checkForWord', start, board.substring(start));
 
     for (let i = 0; i < this.wordList.length; i++) {
       const word = this.wordList[i];
 
-      if (board.substring(0, word.length) === word) {
-        this.scoreWord(word);
+      if (board.substring(start, word.length + start) === word) {
+        await this.scoreWord(word, start);
         return;
       }
     }
 
     this.combo = 0;
+  }
+
+  public async endGame() {
+    for (let i = 1; i < this.board.length - 2; i++) {
+      await this.checkForWord(i);
+    }
   }
 
   public initBank() {
@@ -191,7 +198,7 @@ export default class Game {
   }
 
   public listenForTileClick() {
-    PubSub.subscribe(TILE_CLICK, (msg: string, tile: Tile) => {
+    PubSub.subscribe(TILE_CLICK, async (msg: string, tile: Tile) => {
       if (this.preventClicksPromises.length || !this.turns) {
         return;
       }
@@ -220,7 +227,9 @@ export default class Game {
       // animate other tiles on the board
       this.board.forEach((boardTile: Tile, i: number) => {
         if (this.board.length === 7 && i === 0) {
-          boardTile.animationExit();
+          boardTile
+            .animationExit()
+            .then(() => this.bank.removeChild(boardTile));
           return;
         }
         animations.push(boardTile.animationShiftLeft());
@@ -237,20 +246,27 @@ export default class Game {
         }
 
         if (this.board.length === 7) {
-          this.checkForWord();
+          this.checkForWord().then(() => {
+            if (!this.turns) {
+              this.endGame();
+            }
+          });
         }
       });
 
       // generate new letter tile in place of the one that was just played
-      const newTile = new Tile({
-        letter: this.getNextLetter(),
-        x: currentPosition.x,
-        y: currentPosition.y,
-        clickable: true,
-        animateIn: true
-      });
+      // if the end of the game is coming, skip this step
+      if (this.turns > 4) {
+        const newTile = new Tile({
+          letter: this.getNextLetter(),
+          x: currentPosition.x,
+          y: currentPosition.y,
+          clickable: true,
+          animateIn: true
+        });
 
-      this.bank.addChild(newTile);
+        this.bank.addChild(newTile);
+      }
     });
   }
 
@@ -272,61 +288,67 @@ export default class Game {
     return done;
   }
 
-  public scoreWord(word: string) {
-    // animate word
-    const tiles = this.board.slice(0, word.length);
-    const done = this.preventClicksRequest();
-    const successAnimations = tiles.map(
-      (tile) => tile.animationSuccess().finished
-    );
-    Promise.all(successAnimations).then(() => done());
+  public scoreWord(word: string, start: number = 0) {
+    console.log('scoreWord', word, start);
+    return new Promise((resolve, reject) => {
+      // animate word
+      const tiles = this.board.slice(start, word.length + start);
+      const done = this.preventClicksRequest();
+      const successAnimations = tiles.map(
+        (tile) => tile.animationSuccess().finished
+      );
+      Promise.all(successAnimations).then(() => done());
 
-    // update score
-    let score = (word.length + word.length - 3) * (this.combo + 1);
+      // update score
+      let score = (word.length + word.length - 3) * (this.combo + 1);
 
-    if (word.length === 7) {
-      score += 7;
-    }
-
-    this.score += score;
-    this.text.score.text = `Score: ${this.score}`;
-
-    // update/animate turn score
-    const comboLabel = this.combo ? `Combo! x ${this.combo}` : '';
-    this.text.turnScore.text = `+${score} ${comboLabel}`;
-
-    const startingPosition = this.text.turnScore.y;
-
-    this.text.turnScore.animate({
-      targets: {
-        alpha: 0
-      },
-      alpha: 1,
-      easing: 'easeInSine',
-      endDelay: 1200,
-      delay: 300,
-      duration: 500,
-
-      complete: (anim) => {
-        this.text.turnScore.animate({
-          targets: {
-            alpha: 1,
-            y: startingPosition
-          },
-          alpha: 0,
-          y: '-=10',
-          easing: 'easeInSine',
-          duration: 300,
-
-          complete: () => {
-            this.text.turnScore.y = startingPosition;
-          }
-        });
+      if (word.length === 7) {
+        score += 7;
       }
-    });
 
-    // update combo
-    this.combo++;
+      this.score += score;
+      this.text.score.text = `Score: ${this.score}`;
+
+      // update/animate turn score
+      const comboLabel = this.combo ? `Combo! x ${this.combo}` : '';
+      this.text.turnScore.text = `+${score} ${comboLabel}`;
+      this.text.turnScore.x =
+        VIEW_W / 2 - this.text.turns.width / 2 + start * SLOT_W * 1.125;
+
+      const startingPosition = this.text.turnScore.y;
+
+      this.text.turnScore.animate({
+        targets: {
+          alpha: 0
+        },
+        alpha: 1,
+        easing: 'easeInSine',
+        endDelay: 1200,
+        delay: 300,
+        duration: 500,
+
+        complete: (anim) => {
+          this.text.turnScore.animate({
+            targets: {
+              alpha: 1,
+              y: startingPosition
+            },
+            alpha: 0,
+            y: '-=10',
+            easing: 'easeInSine',
+            duration: 300,
+
+            complete: () => {
+              this.text.turnScore.y = startingPosition;
+              resolve(true);
+            }
+          });
+        }
+      });
+
+      // update combo
+      this.combo++;
+    });
   }
 
   public update(dt: number) {}

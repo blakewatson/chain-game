@@ -24,7 +24,6 @@ export const letterGenerator = () => {
       letters = initialLetters.split('');
     }
 
-    console.log(letters.length);
     const i = Math.floor(Math.random() * letters.length);
 
     const result = letters[i];
