@@ -14,6 +14,26 @@ export const getRandomLetter = (vowelsOnly = false) => {
   return alpha[i];
 };
 
+export const letterGenerator = () => {
+  const initialLetters =
+    'aaaaaaaaabbccddddeeeeeeeeeeeefggghiiiiiiiiijkllllmmnnnnnnooooooooppqrrrrrrssssttttttuuuuvwxyz';
+  let letters = initialLetters.split('');
+
+  return () => {
+    if (!letters.length) {
+      letters = initialLetters.split('');
+    }
+
+    console.log(letters.length);
+    const i = Math.floor(Math.random() * letters.length);
+
+    const result = letters[i];
+    letters.splice(i, 1);
+
+    return result;
+  };
+};
+
 export const isVowel = (letter: string) =>
   'aeiou'.split('').includes(letter.toLowerCase());
 

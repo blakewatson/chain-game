@@ -28080,6 +28080,20 @@ void main() {
     const i = Math.floor(Math.random() * alpha.length);
     return alpha[i];
   };
+  var letterGenerator = () => {
+    const initialLetters = "aaaaaaaaabbccddddeeeeeeeeeeeefggghiiiiiiiiijkllllmmnnnnnnooooooooppqrrrrrrssssttttttuuuuvwxyz";
+    let letters = initialLetters.split("");
+    return () => {
+      if (!letters.length) {
+        letters = initialLetters.split("");
+      }
+      console.log(letters.length);
+      const i = Math.floor(Math.random() * letters.length);
+      const result = letters[i];
+      letters.splice(i, 1);
+      return result;
+    };
+  };
   function rgbFunctionToHex(rgba, asNumber) {
     const parts = rgba.slice(5, -1).split(",").slice(0, -1).map((_) => parseInt(_) / 255);
     if (asNumber) {
@@ -28295,16 +28309,19 @@ void main() {
       this.board = [];
       this.boardBg = null;
       this.combo = 0;
+      this.getNextLetter = letterGenerator();
       this.h = VIEW_H;
       this.lastTime = 0;
       this.preventClicksPromises = [];
       this.score = 0;
       this.ticker = null;
       this.tileEntryPoint = { x: 0, y: 0 };
+      this.turns = 100;
       this.w = VIEW_W;
       this.wordList = [];
       this.text = {
         score: null,
+        turns: null,
         turnScore: null
       };
       this.app = new Application({
@@ -28319,6 +28336,7 @@ void main() {
       this.initBank();
       this.initTextScore();
       this.initTextTurnScore();
+      this.initTextTurns();
       const entryPoint = this.boardBg.children.at(-1).getBounds();
       this.tileEntryPoint = {
         x: entryPoint.x,
@@ -28345,7 +28363,7 @@ void main() {
     }
     initBank() {
       this.bank = new Container();
-      const letters = [];
+      let letters = [];
       for (let i = 0; i < 5; i++) {
         if (i === 0) {
           letters.push(getRandomLetter(true));
@@ -28391,6 +28409,17 @@ void main() {
       this.text.score.y = 20;
       this.addChild(this.text.score);
     }
+    initTextTurns() {
+      this.text.turns = new Text2(`Turns: ${this.turns}`, {
+        fontFamily: "Ships Whistle",
+        fontSize: 32,
+        align: "left",
+        fill: "#09596D"
+      });
+      this.text.turns.x = VIEW_W / 2 - this.text.turns.width / 2;
+      this.text.turns.y = VIEW_H - this.text.turns.height - 20;
+      this.addChild(this.text.turns);
+    }
     initTextTurnScore() {
       this.text.turnScore = new Text2("", {
         fontFamily: "Ships Whistle",
@@ -28411,9 +28440,11 @@ void main() {
     }
     listenForTileClick() {
       import_pubsub_js2.default.subscribe(TILE_CLICK, (msg, tile) => {
-        if (this.preventClicksPromises.length) {
+        if (this.preventClicksPromises.length || !this.turns) {
           return;
         }
+        this.turns--;
+        this.text.turns.text = `Turns: ${this.turns}`;
         const done = this.preventClicksRequest();
         const animations = [];
         const currentPosition = {
@@ -28431,16 +28462,16 @@ void main() {
         });
         Promise.all(animations.map((a) => a.finished)).then(() => {
           done();
+          this.board.push(tile);
+          if (this.board.length > 7) {
+            this.board.shift();
+          }
+          if (this.board.length === 7) {
+            this.checkForWord();
+          }
         });
-        this.board.push(tile);
-        if (this.board.length > 7) {
-          this.board.shift();
-        }
-        if (this.board.length === 7) {
-          this.checkForWord();
-        }
         const newTile = new Tile({
-          letter: getRandomLetter(),
+          letter: this.getNextLetter(),
           x: currentPosition.x,
           y: currentPosition.y,
           clickable: true,

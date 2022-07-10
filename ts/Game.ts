@@ -17,7 +17,7 @@ import {
 } from './constants';
 import Text from './Text';
 import Tile from './Tile';
-import { getRandomLetter } from './utils';
+import { getRandomLetter, letterGenerator } from './utils';
 
 export default class Game {
   public app: Application | null = null;
@@ -25,17 +25,20 @@ export default class Game {
   public board: Tile[] = [];
   public boardBg: Container | null = null;
   public combo = 0;
+  public getNextLetter = letterGenerator();
   public h: number = VIEW_H;
   public lastTime: number = 0;
   public preventClicksPromises: Promise<any>[] = [];
   public score = 0;
   public ticker: Ticker | null = null;
   public tileEntryPoint: { x: number; y: number } = { x: 0, y: 0 };
+  public turns = 100;
   public w: number = VIEW_W;
   public wordList: string[] = [];
 
   public text: { [key: string]: Text | null } = {
     score: null,
+    turns: null,
     turnScore: null
   };
 
@@ -55,6 +58,7 @@ export default class Game {
     this.initBank();
     this.initTextScore();
     this.initTextTurnScore();
+    this.initTextTurns();
 
     // calculate the position where newly played tiles should go
     const entryPoint = this.boardBg.children.at(-1).getBounds();
@@ -93,7 +97,7 @@ export default class Game {
   public initBank() {
     this.bank = new Container();
 
-    const letters: string[] = [];
+    let letters: string[] = [];
 
     for (let i = 0; i < 5; i++) {
       if (i === 0) {
@@ -151,6 +155,20 @@ export default class Game {
     this.addChild(this.text.score);
   }
 
+  public initTextTurns() {
+    this.text.turns = new Text(`Turns: ${this.turns}`, {
+      fontFamily: 'Ships Whistle',
+      fontSize: 32,
+      align: 'left',
+      fill: '#09596D'
+    });
+
+    this.text.turns.x = VIEW_W / 2 - this.text.turns.width / 2;
+    this.text.turns.y = VIEW_H - this.text.turns.height - 20;
+
+    this.addChild(this.text.turns);
+  }
+
   public initTextTurnScore() {
     this.text.turnScore = new Text('', {
       fontFamily: 'Ships Whistle',
@@ -174,9 +192,12 @@ export default class Game {
 
   public listenForTileClick() {
     PubSub.subscribe(TILE_CLICK, (msg: string, tile: Tile) => {
-      if (this.preventClicksPromises.length) {
+      if (this.preventClicksPromises.length || !this.turns) {
         return;
       }
+
+      this.turns--;
+      this.text.turns.text = `Turns: ${this.turns}`;
 
       const done = this.preventClicksRequest();
 
@@ -207,22 +228,22 @@ export default class Game {
 
       Promise.all(animations.map((a) => a.finished)).then(() => {
         done();
+
+        // add tile to the board
+        this.board.push(tile);
+
+        if (this.board.length > 7) {
+          this.board.shift();
+        }
+
+        if (this.board.length === 7) {
+          this.checkForWord();
+        }
       });
-
-      // add tile to the board
-      this.board.push(tile);
-
-      if (this.board.length > 7) {
-        this.board.shift();
-      }
-
-      if (this.board.length === 7) {
-        this.checkForWord();
-      }
 
       // generate new letter tile in place of the one that was just played
       const newTile = new Tile({
-        letter: getRandomLetter(),
+        letter: this.getNextLetter(),
         x: currentPosition.x,
         y: currentPosition.y,
         clickable: true,
