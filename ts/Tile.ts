@@ -82,7 +82,6 @@ export default class Tile extends Container {
     this.text.style = {
       fontFamily: 'Ships Whistle',
       fontSize: 60,
-      fontWeight: 'bold',
       align: 'center',
       fill: color
     };

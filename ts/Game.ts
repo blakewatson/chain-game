@@ -15,6 +15,7 @@ import {
   VIEW_H,
   VIEW_W
 } from './constants';
+import Text from './Text';
 import Tile from './Tile';
 import { getRandomLetter } from './utils';
 
@@ -23,13 +24,20 @@ export default class Game {
   public bank: Container | null = null;
   public board: Tile[] = [];
   public boardBg: Container | null = null;
+  public combo = 0;
   public h: number = VIEW_H;
   public lastTime: number = 0;
   public preventClicksPromises: Promise<any>[] = [];
+  public score = 0;
   public ticker: Ticker | null = null;
   public tileEntryPoint: { x: number; y: number } = { x: 0, y: 0 };
   public w: number = VIEW_W;
   public wordList: string[] = [];
+
+  public text: { [key: string]: Text | null } = {
+    score: null,
+    turnScore: null
+  };
 
   constructor(ticker: Ticker) {
     this.app = new Application({
@@ -45,6 +53,8 @@ export default class Game {
 
     this.initBoardBg();
     this.initBank();
+    this.initTextScore();
+    this.initTextTurnScore();
 
     // calculate the position where newly played tiles should go
     const entryPoint = this.boardBg.children.at(-1).getBounds();
@@ -73,9 +83,11 @@ export default class Game {
 
       if (board.substring(0, word.length) === word) {
         this.scoreWord(word);
-        break;
+        return;
       }
     }
+
+    this.combo = 0;
   }
 
   public initBank() {
@@ -123,6 +135,41 @@ export default class Game {
     this.addChild(this.boardBg);
     this.boardBg.x = VIEW_W / 2 - this.boardBg.width / 2;
     this.boardBg.y = VIEW_H / 2 - TILE_H;
+  }
+
+  public initTextScore() {
+    this.text.score = new Text('Score: 0', {
+      fontFamily: 'Ships Whistle',
+      fontSize: 32,
+      align: 'left',
+      fill: '#09596D'
+    });
+
+    this.text.score.x = 20;
+    this.text.score.y = 20;
+
+    this.addChild(this.text.score);
+  }
+
+  public initTextTurnScore() {
+    this.text.turnScore = new Text('', {
+      fontFamily: 'Ships Whistle',
+      fontSize: 32,
+      align: 'left',
+      fill: '#ffffff',
+      dropShadow: true,
+      dropShadowColor: '#000000',
+      dropShadowDistance: 3,
+      dropShadowAngle: 90,
+      dropShadowBlur: 3,
+      dropShadowAlpha: 0.33
+    });
+
+    this.text.turnScore.x = this.boardBg.x + SLOT_W * 0.125;
+    this.text.turnScore.y = this.boardBg.y - 80;
+    this.text.turnScore.alpha = 0;
+
+    this.addChild(this.text.turnScore);
   }
 
   public listenForTileClick() {
@@ -212,6 +259,53 @@ export default class Game {
       (tile) => tile.animationSuccess().finished
     );
     Promise.all(successAnimations).then(() => done());
+
+    // update score
+    let score = (word.length + word.length - 3) * (this.combo + 1);
+
+    if (word.length === 7) {
+      score += 7;
+    }
+
+    this.score += score;
+    this.text.score.text = `Score: ${this.score}`;
+
+    // update/animate turn score
+    const comboLabel = this.combo ? `Combo! x ${this.combo}` : '';
+    this.text.turnScore.text = `+${score} ${comboLabel}`;
+
+    const startingPosition = this.text.turnScore.y;
+
+    this.text.turnScore.animate({
+      targets: {
+        alpha: 0
+      },
+      alpha: 1,
+      easing: 'easeInSine',
+      endDelay: 1200,
+      delay: 300,
+      duration: 500,
+
+      complete: (anim) => {
+        this.text.turnScore.animate({
+          targets: {
+            alpha: 1,
+            y: startingPosition
+          },
+          alpha: 0,
+          y: '-=10',
+          easing: 'easeInSine',
+          duration: 300,
+
+          complete: () => {
+            this.text.turnScore.y = startingPosition;
+          }
+        });
+      }
+    });
+
+    // update combo
+    this.combo++;
   }
 
   public update(dt: number) {}

@@ -20608,20 +20608,20 @@
     "system-ui"
   ];
   var TextStyle = function() {
-    function TextStyle3(style) {
+    function TextStyle4(style) {
       this.styleID = 0;
       this.reset();
       deepCopyProperties(this, style, style);
     }
-    TextStyle3.prototype.clone = function() {
+    TextStyle4.prototype.clone = function() {
       var clonedProperties = {};
       deepCopyProperties(clonedProperties, this, defaultStyle);
-      return new TextStyle3(clonedProperties);
+      return new TextStyle4(clonedProperties);
     };
-    TextStyle3.prototype.reset = function() {
+    TextStyle4.prototype.reset = function() {
       deepCopyProperties(this, defaultStyle, defaultStyle);
     };
-    Object.defineProperty(TextStyle3.prototype, "align", {
+    Object.defineProperty(TextStyle4.prototype, "align", {
       get: function() {
         return this._align;
       },
@@ -20634,7 +20634,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "breakWords", {
+    Object.defineProperty(TextStyle4.prototype, "breakWords", {
       get: function() {
         return this._breakWords;
       },
@@ -20647,7 +20647,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "dropShadow", {
+    Object.defineProperty(TextStyle4.prototype, "dropShadow", {
       get: function() {
         return this._dropShadow;
       },
@@ -20660,7 +20660,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "dropShadowAlpha", {
+    Object.defineProperty(TextStyle4.prototype, "dropShadowAlpha", {
       get: function() {
         return this._dropShadowAlpha;
       },
@@ -20673,7 +20673,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "dropShadowAngle", {
+    Object.defineProperty(TextStyle4.prototype, "dropShadowAngle", {
       get: function() {
         return this._dropShadowAngle;
       },
@@ -20686,7 +20686,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "dropShadowBlur", {
+    Object.defineProperty(TextStyle4.prototype, "dropShadowBlur", {
       get: function() {
         return this._dropShadowBlur;
       },
@@ -20699,7 +20699,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "dropShadowColor", {
+    Object.defineProperty(TextStyle4.prototype, "dropShadowColor", {
       get: function() {
         return this._dropShadowColor;
       },
@@ -20713,7 +20713,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "dropShadowDistance", {
+    Object.defineProperty(TextStyle4.prototype, "dropShadowDistance", {
       get: function() {
         return this._dropShadowDistance;
       },
@@ -20726,7 +20726,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "fill", {
+    Object.defineProperty(TextStyle4.prototype, "fill", {
       get: function() {
         return this._fill;
       },
@@ -20740,7 +20740,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "fillGradientType", {
+    Object.defineProperty(TextStyle4.prototype, "fillGradientType", {
       get: function() {
         return this._fillGradientType;
       },
@@ -20753,7 +20753,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "fillGradientStops", {
+    Object.defineProperty(TextStyle4.prototype, "fillGradientStops", {
       get: function() {
         return this._fillGradientStops;
       },
@@ -20766,7 +20766,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "fontFamily", {
+    Object.defineProperty(TextStyle4.prototype, "fontFamily", {
       get: function() {
         return this._fontFamily;
       },
@@ -20779,7 +20779,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "fontSize", {
+    Object.defineProperty(TextStyle4.prototype, "fontSize", {
       get: function() {
         return this._fontSize;
       },
@@ -20792,7 +20792,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "fontStyle", {
+    Object.defineProperty(TextStyle4.prototype, "fontStyle", {
       get: function() {
         return this._fontStyle;
       },
@@ -20805,7 +20805,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "fontVariant", {
+    Object.defineProperty(TextStyle4.prototype, "fontVariant", {
       get: function() {
         return this._fontVariant;
       },
@@ -20818,7 +20818,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "fontWeight", {
+    Object.defineProperty(TextStyle4.prototype, "fontWeight", {
       get: function() {
         return this._fontWeight;
       },
@@ -20831,7 +20831,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "letterSpacing", {
+    Object.defineProperty(TextStyle4.prototype, "letterSpacing", {
       get: function() {
         return this._letterSpacing;
       },
@@ -20844,7 +20844,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "lineHeight", {
+    Object.defineProperty(TextStyle4.prototype, "lineHeight", {
       get: function() {
         return this._lineHeight;
       },
@@ -20857,7 +20857,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "leading", {
+    Object.defineProperty(TextStyle4.prototype, "leading", {
       get: function() {
         return this._leading;
       },
@@ -20870,7 +20870,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "lineJoin", {
+    Object.defineProperty(TextStyle4.prototype, "lineJoin", {
       get: function() {
         return this._lineJoin;
       },
@@ -20883,7 +20883,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "miterLimit", {
+    Object.defineProperty(TextStyle4.prototype, "miterLimit", {
       get: function() {
         return this._miterLimit;
       },
@@ -20896,7 +20896,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "padding", {
+    Object.defineProperty(TextStyle4.prototype, "padding", {
       get: function() {
         return this._padding;
       },
@@ -20909,7 +20909,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "stroke", {
+    Object.defineProperty(TextStyle4.prototype, "stroke", {
       get: function() {
         return this._stroke;
       },
@@ -20923,7 +20923,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "strokeThickness", {
+    Object.defineProperty(TextStyle4.prototype, "strokeThickness", {
       get: function() {
         return this._strokeThickness;
       },
@@ -20936,7 +20936,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "textBaseline", {
+    Object.defineProperty(TextStyle4.prototype, "textBaseline", {
       get: function() {
         return this._textBaseline;
       },
@@ -20949,7 +20949,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "trim", {
+    Object.defineProperty(TextStyle4.prototype, "trim", {
       get: function() {
         return this._trim;
       },
@@ -20962,7 +20962,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "whiteSpace", {
+    Object.defineProperty(TextStyle4.prototype, "whiteSpace", {
       get: function() {
         return this._whiteSpace;
       },
@@ -20975,7 +20975,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "wordWrap", {
+    Object.defineProperty(TextStyle4.prototype, "wordWrap", {
       get: function() {
         return this._wordWrap;
       },
@@ -20988,7 +20988,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(TextStyle3.prototype, "wordWrapWidth", {
+    Object.defineProperty(TextStyle4.prototype, "wordWrapWidth", {
       get: function() {
         return this._wordWrapWidth;
       },
@@ -21001,7 +21001,7 @@
       enumerable: false,
       configurable: true
     });
-    TextStyle3.prototype.toFontString = function() {
+    TextStyle4.prototype.toFontString = function() {
       var fontSizeString = typeof this.fontSize === "number" ? this.fontSize + "px" : this.fontSize;
       var fontFamilies = this.fontFamily;
       if (!Array.isArray(this.fontFamily)) {
@@ -21016,7 +21016,7 @@
       }
       return this.fontStyle + " " + this.fontVariant + " " + this.fontWeight + " " + fontSizeString + " " + fontFamilies.join(",");
     };
-    return TextStyle3;
+    return TextStyle4;
   }();
   function getSingleColor(color) {
     if (typeof color === "number") {
@@ -21423,8 +21423,8 @@
     baseTexture: true
   };
   var Text = function(_super) {
-    __extends9(Text2, _super);
-    function Text2(text, style, canvas) {
+    __extends9(Text3, _super);
+    function Text3(text, style, canvas) {
       var _this = this;
       var ownCanvas = false;
       if (!canvas) {
@@ -21451,7 +21451,7 @@
       _this.localStyleID = -1;
       return _this;
     }
-    Text2.prototype.updateText = function(respectDirty) {
+    Text3.prototype.updateText = function(respectDirty) {
       var style = this._style;
       if (this.localStyleID !== style.styleID) {
         this.dirty = true;
@@ -21506,7 +21506,7 @@
           context2.shadowOffsetY = 0;
         }
         var linePositionYShift = (lineHeight - fontProperties.fontSize) / 2;
-        if (!Text2.nextLineHeightBehavior || lineHeight - fontProperties.fontSize < 0) {
+        if (!Text3.nextLineHeightBehavior || lineHeight - fontProperties.fontSize < 0) {
           linePositionYShift = 0;
         }
         for (var i_1 = 0; i_1 < lines.length; i_1++) {
@@ -21527,13 +21527,13 @@
       }
       this.updateTexture();
     };
-    Text2.prototype.drawLetterSpacing = function(text, x, y, isStroke) {
+    Text3.prototype.drawLetterSpacing = function(text, x, y, isStroke) {
       if (isStroke === void 0) {
         isStroke = false;
       }
       var style = this._style;
       var letterSpacing = style.letterSpacing;
-      var supportLetterSpacing = Text2.experimentalLetterSpacing && ("letterSpacing" in CanvasRenderingContext2D.prototype || "textLetterSpacing" in CanvasRenderingContext2D.prototype);
+      var supportLetterSpacing = Text3.experimentalLetterSpacing && ("letterSpacing" in CanvasRenderingContext2D.prototype || "textLetterSpacing" in CanvasRenderingContext2D.prototype);
       if (letterSpacing === 0 || supportLetterSpacing) {
         if (supportLetterSpacing) {
           this.context.letterSpacing = letterSpacing;
@@ -21566,7 +21566,7 @@
         previousWidth = currentWidth;
       }
     };
-    Text2.prototype.updateTexture = function() {
+    Text3.prototype.updateTexture = function() {
       var canvas = this.canvas;
       if (this._style.trim) {
         var trimmed = trimCanvas(canvas);
@@ -21591,7 +21591,7 @@
       texture.updateUvs();
       this.dirty = false;
     };
-    Text2.prototype._render = function(renderer) {
+    Text3.prototype._render = function(renderer) {
       if (this._autoResolution && this._resolution !== renderer.resolution) {
         this._resolution = renderer.resolution;
         this.dirty = true;
@@ -21599,26 +21599,26 @@
       this.updateText(true);
       _super.prototype._render.call(this, renderer);
     };
-    Text2.prototype.updateTransform = function() {
+    Text3.prototype.updateTransform = function() {
       this.updateText(true);
       _super.prototype.updateTransform.call(this);
     };
-    Text2.prototype.getBounds = function(skipUpdate, rect) {
+    Text3.prototype.getBounds = function(skipUpdate, rect) {
       this.updateText(true);
       if (this._textureID === -1) {
         skipUpdate = false;
       }
       return _super.prototype.getBounds.call(this, skipUpdate, rect);
     };
-    Text2.prototype.getLocalBounds = function(rect) {
+    Text3.prototype.getLocalBounds = function(rect) {
       this.updateText(true);
       return _super.prototype.getLocalBounds.call(this, rect);
     };
-    Text2.prototype._calculateBounds = function() {
+    Text3.prototype._calculateBounds = function() {
       this.calculateVertices();
       this._bounds.addQuad(this.vertexData);
     };
-    Text2.prototype._generateFillStyle = function(style, lines, metrics) {
+    Text3.prototype._generateFillStyle = function(style, lines, metrics) {
       var fillStyle = style.fill;
       if (!Array.isArray(fillStyle)) {
         return fillStyle;
@@ -21688,7 +21688,7 @@
       }
       return gradient;
     };
-    Text2.prototype.destroy = function(options) {
+    Text3.prototype.destroy = function(options) {
       if (typeof options === "boolean") {
         options = { children: options };
       }
@@ -21701,7 +21701,7 @@
       this.canvas = null;
       this._style = null;
     };
-    Object.defineProperty(Text2.prototype, "width", {
+    Object.defineProperty(Text3.prototype, "width", {
       get: function() {
         this.updateText(true);
         return Math.abs(this.scale.x) * this._texture.orig.width;
@@ -21715,7 +21715,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(Text2.prototype, "height", {
+    Object.defineProperty(Text3.prototype, "height", {
       get: function() {
         this.updateText(true);
         return Math.abs(this.scale.y) * this._texture.orig.height;
@@ -21729,7 +21729,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(Text2.prototype, "style", {
+    Object.defineProperty(Text3.prototype, "style", {
       get: function() {
         return this._style;
       },
@@ -21746,7 +21746,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(Text2.prototype, "text", {
+    Object.defineProperty(Text3.prototype, "text", {
       get: function() {
         return this._text;
       },
@@ -21761,7 +21761,7 @@
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(Text2.prototype, "resolution", {
+    Object.defineProperty(Text3.prototype, "resolution", {
       get: function() {
         return this._resolution;
       },
@@ -21776,9 +21776,9 @@
       enumerable: false,
       configurable: true
     });
-    Text2.nextLineHeightBehavior = false;
-    Text2.experimentalLetterSpacing = false;
-    return Text2;
+    Text3.nextLineHeightBehavior = false;
+    Text3.experimentalLetterSpacing = false;
+    return Text3;
   }(Sprite);
 
   // node_modules/@pixi/prepare/dist/esm/prepare.js
@@ -28043,6 +28043,29 @@ void main() {
   };
   var anime_es_default = anime;
 
+  // ts/Text.ts
+  var Text2 = class extends Text {
+    constructor(initialText, initialStyle) {
+      super(initialText);
+      this.initialStyle = null;
+      if (initialStyle) {
+        this.style = initialStyle;
+      }
+    }
+    animate(options) {
+      const animatedProperties = Object.keys(options.targets);
+      return anime_es_default({
+        ...options,
+        update: (anim) => {
+          const obj = anim.animatables[0].target;
+          animatedProperties.forEach((prop) => {
+            this[prop] = obj[prop];
+          });
+        }
+      });
+    }
+  };
+
   // ts/Tile.ts
   var import_pubsub_js = __toESM(require_pubsub());
 
@@ -28117,7 +28140,6 @@ void main() {
       this.text.style = {
         fontFamily: "Ships Whistle",
         fontSize: 60,
-        fontWeight: "bold",
         align: "center",
         fill: color
       };
@@ -28272,13 +28294,19 @@ void main() {
       this.bank = null;
       this.board = [];
       this.boardBg = null;
+      this.combo = 0;
       this.h = VIEW_H;
       this.lastTime = 0;
       this.preventClicksPromises = [];
+      this.score = 0;
       this.ticker = null;
       this.tileEntryPoint = { x: 0, y: 0 };
       this.w = VIEW_W;
       this.wordList = [];
+      this.text = {
+        score: null,
+        turnScore: null
+      };
       this.app = new Application({
         width: VIEW_W,
         height: VIEW_H,
@@ -28289,6 +28317,8 @@ void main() {
       document.querySelector("#app")?.append(this.app.view);
       this.initBoardBg();
       this.initBank();
+      this.initTextScore();
+      this.initTextTurnScore();
       const entryPoint = this.boardBg.children.at(-1).getBounds();
       this.tileEntryPoint = {
         x: entryPoint.x,
@@ -28308,9 +28338,10 @@ void main() {
         const word = this.wordList[i];
         if (board.substring(0, word.length) === word) {
           this.scoreWord(word);
-          break;
+          return;
         }
       }
+      this.combo = 0;
     }
     initBank() {
       this.bank = new Container();
@@ -28348,6 +28379,35 @@ void main() {
       this.addChild(this.boardBg);
       this.boardBg.x = VIEW_W / 2 - this.boardBg.width / 2;
       this.boardBg.y = VIEW_H / 2 - TILE_H;
+    }
+    initTextScore() {
+      this.text.score = new Text2("Score: 0", {
+        fontFamily: "Ships Whistle",
+        fontSize: 32,
+        align: "left",
+        fill: "#09596D"
+      });
+      this.text.score.x = 20;
+      this.text.score.y = 20;
+      this.addChild(this.text.score);
+    }
+    initTextTurnScore() {
+      this.text.turnScore = new Text2("", {
+        fontFamily: "Ships Whistle",
+        fontSize: 32,
+        align: "left",
+        fill: "#ffffff",
+        dropShadow: true,
+        dropShadowColor: "#000000",
+        dropShadowDistance: 3,
+        dropShadowAngle: 90,
+        dropShadowBlur: 3,
+        dropShadowAlpha: 0.33
+      });
+      this.text.turnScore.x = this.boardBg.x + SLOT_W * 0.125;
+      this.text.turnScore.y = this.boardBg.y - 80;
+      this.text.turnScore.alpha = 0;
+      this.addChild(this.text.turnScore);
     }
     listenForTileClick() {
       import_pubsub_js2.default.subscribe(TILE_CLICK, (msg, tile) => {
@@ -28405,6 +28465,41 @@ void main() {
       const done = this.preventClicksRequest();
       const successAnimations = tiles.map((tile) => tile.animationSuccess().finished);
       Promise.all(successAnimations).then(() => done());
+      let score = (word.length + word.length - 3) * (this.combo + 1);
+      if (word.length === 7) {
+        score += 7;
+      }
+      this.score += score;
+      this.text.score.text = `Score: ${this.score}`;
+      const comboLabel = this.combo ? `Combo! x ${this.combo}` : "";
+      this.text.turnScore.text = `+${score} ${comboLabel}`;
+      const startingPosition = this.text.turnScore.y;
+      this.text.turnScore.animate({
+        targets: {
+          alpha: 0
+        },
+        alpha: 1,
+        easing: "easeInSine",
+        endDelay: 1200,
+        delay: 300,
+        duration: 500,
+        complete: (anim) => {
+          this.text.turnScore.animate({
+            targets: {
+              alpha: 1,
+              y: startingPosition
+            },
+            alpha: 0,
+            y: "-=10",
+            easing: "easeInSine",
+            duration: 300,
+            complete: () => {
+              this.text.turnScore.y = startingPosition;
+            }
+          });
+        }
+      });
+      this.combo++;
     }
     update(dt) {
     }
