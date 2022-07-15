@@ -1,4 +1,4 @@
-import { utils } from 'pixi.js';
+import { Texture, utils } from 'pixi.js';
 
 export const getRandomLetter = (vowelsOnly = false) => {
   const alpha: string[] = [];
@@ -12,6 +12,44 @@ export const getRandomLetter = (vowelsOnly = false) => {
   const i = Math.floor(Math.random() * alpha.length);
 
   return alpha[i];
+};
+
+export interface IColorStop {
+  offset: number;
+  color: string;
+}
+
+export interface IGradientPosition {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+export interface IGradientOptions {
+  width: number;
+  height: number;
+  position: IGradientPosition;
+  stops: IColorStop[];
+}
+
+export const linearGradient = (options: IGradientOptions) => {
+  const { width, height, position, stops } = options;
+
+  const c = document.createElement('canvas');
+  const ctx = c.getContext('2d');
+  const grd = ctx.createLinearGradient(
+    position.x1,
+    position.y1,
+    position.x2,
+    position.y2
+  );
+
+  stops.forEach((stop) => grd.addColorStop(stop.offset, stop.color));
+
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, width, height);
+  return Texture.from(c);
 };
 
 export const letterGenerator = () => {

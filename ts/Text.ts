@@ -7,9 +7,14 @@ export default class Text extends PixiText {
   public constructor(initialText: string, initialStyle?: Partial<TextStyle>) {
     super(initialText);
 
-    if (initialStyle) {
-      this.style = initialStyle;
-    }
+    const defaultStyle: Partial<TextStyle> = {
+      fontFamily: 'Ships Whistle',
+      fontSize: 32,
+      align: 'center',
+      fill: '#09596D'
+    };
+
+    this.style = Object.assign({}, defaultStyle, initialStyle || {});
   }
 
   public animate(options: AnimeParams) {

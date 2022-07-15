@@ -26637,21 +26637,6 @@ void main() {
   Application.registerPlugin(TickerPlugin);
   Application.registerPlugin(AppLoaderPlugin);
 
-  // ts/Game.ts
-  var import_pubsub_js2 = __toESM(require_pubsub());
-
-  // ts/constants.ts
-  var VIEW_W = 800;
-  var VIEW_H = 600;
-  var SHADOW_Y = 6;
-  var TILE_W = 60;
-  var TILE_H = 65;
-  var TILE_W_FULL = TILE_W + 2;
-  var TILE_H_FULL = TILE_H + SHADOW_Y + 3;
-  var SLOT_W = TILE_W_FULL * 1.25;
-  var SLOT_H = TILE_H_FULL * 1.25;
-  var TILE_CLICK = "tile-click";
-
   // node_modules/animejs/lib/anime.es.js
   var defaultInstanceSettings = {
     update: null,
@@ -28043,14 +28028,52 @@ void main() {
   };
   var anime_es_default = anime;
 
+  // ts/Game.ts
+  var import_pubsub_js2 = __toESM(require_pubsub());
+
+  // ts/Button.ts
+  var import_pubsub_js = __toESM(require_pubsub());
+
+  // ts/constants.ts
+  var VIEW_W = 800;
+  var VIEW_H = 600;
+  var INITIAL_TURNS = 75;
+  var COLOR_YELLOW = "#fcf100";
+  var COLOR_WHITE = "#ffffff";
+  var COLOR_BG = "00ccff";
+  var COLOR_BUTTON_GRADIENT_TOP = "#fff600";
+  var COLOR_BUTTON_GRADIENT_BOTTOM = "#d1ab00";
+  var COLOR_BUTTON_TEXT = "#736200";
+  var COLOR_BUTTON_HOVER_GRADIENT_TOP = "#fffdc2";
+  var COLOR_BUTTON_HOVER_GRADIENT_BOTTOM = "#ffda35";
+  var COLOR_SLOT = COLOR_WHITE;
+  var COLOR_SUCCESS_GRADIENT_TOP = "#38ff38";
+  var COLOR_SUCCESS_GRADIENT_BOTTOM = "#139a13";
+  var COLOR_SUCCESS_TEXT = "#073807";
+  var COLOR_TEXT_TURN_SCORE = COLOR_WHITE;
+  var COLOR_TITLE = COLOR_YELLOW;
+  var SHADOW_Y = 6;
+  var TILE_W = 60;
+  var TILE_H = 65 + SHADOW_Y;
+  var TILE_W_FULL = TILE_W + 2;
+  var TILE_H_FULL = TILE_H + SHADOW_Y + 3;
+  var SLOT_W = TILE_W_FULL * 1.25;
+  var SLOT_H = TILE_H_FULL + TILE_W_FULL * 0.25;
+  var TILE_CLICK = "tile-click";
+  var PLAY_CLICK = "play-click";
+
   // ts/Text.ts
   var Text2 = class extends Text {
     constructor(initialText, initialStyle) {
       super(initialText);
       this.initialStyle = null;
-      if (initialStyle) {
-        this.style = initialStyle;
-      }
+      const defaultStyle2 = {
+        fontFamily: "Ships Whistle",
+        fontSize: 32,
+        align: "center",
+        fill: "#09596D"
+      };
+      this.style = Object.assign({}, defaultStyle2, initialStyle || {});
     }
     animate(options) {
       const animatedProperties = Object.keys(options.targets);
@@ -28066,9 +28089,6 @@ void main() {
     }
   };
 
-  // ts/Tile.ts
-  var import_pubsub_js = __toESM(require_pubsub());
-
   // ts/utils.ts
   var getRandomLetter = (vowelsOnly = false) => {
     const alpha = [];
@@ -28079,6 +28099,16 @@ void main() {
     }
     const i = Math.floor(Math.random() * alpha.length);
     return alpha[i];
+  };
+  var linearGradient = (options) => {
+    const { width, height, position, stops } = options;
+    const c = document.createElement("canvas");
+    const ctx = c.getContext("2d");
+    const grd = ctx.createLinearGradient(position.x1, position.y1, position.x2, position.y2);
+    stops.forEach((stop) => grd.addColorStop(stop.offset, stop.color));
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, width, height);
+    return Texture.from(c);
   };
   var letterGenerator = () => {
     const initialLetters = "aaaaaaaaabbccddddeeeeeeeeeeeefggghiiiiiiiiijkllllmmnnnnnnooooooooppqrrrrrrssssttttttuuuuvwxyz";
@@ -28101,68 +28131,156 @@ void main() {
     return utils_exports.hex2string(utils_exports.rgb2hex(parts));
   }
 
-  // ts/Tile.ts
-  var SHADOW_Y2 = 6;
-  var TILE_W2 = 60;
-  var TILE_H2 = 65 + SHADOW_Y2;
-  var Tile = class extends Container {
+  // ts/Button.ts
+  var Button = class extends Container {
     constructor(options) {
       super();
-      this.animateIn = false;
       this.bg = null;
-      this.clickable = false;
-      this.color = "#8c7800";
-      this.letter = "";
+      this.buttonHeight = 0;
+      this.buttonWidth = 0;
+      this.clickEventName = "button-click";
+      this.corner = 12;
+      this.fontSize = 32;
+      this.label = "";
+      this.paddingX = 0;
+      this.paddingY = 0;
       this.shadow = null;
       this.text = null;
       this.textStyle = {};
-      this.interactive = options.clickable;
-      this.buttonMode = options.clickable;
-      this.letter = options.letter;
-      this.width = TILE_W2;
-      this.height = TILE_H2;
-      this.x = options.x;
-      this.y = options.y;
-      this.bg = new Graphics();
-      this.applyTileBackground();
-      this.shadow = new Graphics();
-      this.applyShadow();
+      this.label = options.label;
+      this.fontSize = options.fontSize || this.fontSize;
+      this.paddingX = options.paddingX;
+      this.paddingY = options.paddingY;
+      this.x = options.x || 0;
+      this.y = options.y || 0;
+      this.corner = options.corner || this.corner;
       this.text = this.getText();
       this.applyTextStyle();
+      this.setButtonDimensions(options.width, options.height);
+      this.centerText();
+      this.bg = new Graphics();
+      this.applyBackground();
+      this.shadow = new Graphics();
+      this.applyShadow();
       this.addChild(this.shadow);
       this.addChild(this.bg);
       this.addChild(this.text);
-      if (options.animateIn) {
-        this.animationEnter();
-      }
-      const self2 = this;
-      this.addListener("pointerover", () => this.onHover());
-      this.addListener("pointerout", () => this.applyTileBackground());
-      this.addListener("click", () => {
-        import_pubsub_js.default.publish(TILE_CLICK, this);
-      });
+      this.clickEventName = options.clickEventName || this.clickEventName;
+      this.setClickable(options.clickable === void 0 ? true : options.clickable);
     }
-    applyShadow(color = 7561728) {
+    applyShadow(color = utils_exports.string2hex(COLOR_BUTTON_TEXT)) {
       this.shadow.clear();
       this.shadow.lineStyle(1, color);
       this.shadow.beginFill(color);
-      this.shadow.drawRoundedRect(0, SHADOW_Y2, TILE_W2, TILE_H2, 12);
+      this.shadow.drawRoundedRect(0, SHADOW_Y, this.buttonWidth, this.buttonHeight, this.corner);
       this.shadow.endFill();
     }
-    applyTextStyle(color = "#736200") {
+    applyTextStyle(color = COLOR_BUTTON_TEXT) {
       this.text.style = {
         fontFamily: "Ships Whistle",
-        fontSize: 60,
+        fontSize: this.fontSize,
         align: "center",
         fill: color
       };
     }
-    applyTileBackground(colorOne = "#fff600", colorTwo = "#D1AB00", lineColor = 7561728) {
+    applyBackground(colorOne = COLOR_BUTTON_GRADIENT_TOP, colorTwo = COLOR_BUTTON_GRADIENT_BOTTOM, lineColor = utils_exports.string2hex(COLOR_BUTTON_TEXT)) {
       this.bg.clear();
       this.bg.lineStyle(1, lineColor);
       this.bg.beginTextureFill({ texture: this.gradient(colorOne, colorTwo) });
-      this.bg.drawRoundedRect(0, 0, TILE_W2, TILE_H2, 12);
+      this.bg.drawRoundedRect(0, 0, this.buttonWidth, this.buttonHeight, 12);
       this.bg.endFill();
+    }
+    centerText() {
+      this.text.x = this.buttonWidth / 2;
+      this.text.y = this.buttonHeight / 2;
+    }
+    getText() {
+      const text = new Text2(this.label);
+      text.resolution = window.devicePixelRatio || 1;
+      text.anchor.set(0.5);
+      return text;
+    }
+    gradient(from, to) {
+      return linearGradient({
+        width: this.buttonWidth,
+        height: this.buttonHeight,
+        position: {
+          x1: 0,
+          y1: 0,
+          x2: 0,
+          y2: this.buttonHeight
+        },
+        stops: [
+          { offset: 0, color: from },
+          { offset: 1, color: to }
+        ]
+      });
+    }
+    initListeners() {
+      this.addListener("pointerover", () => this.onHover());
+      this.addListener("pointerout", () => this.applyBackground());
+      this.addListener("click", () => {
+        import_pubsub_js.default.publish(this.clickEventName, this);
+      });
+    }
+    onHover() {
+      this.applyBackground(COLOR_BUTTON_HOVER_GRADIENT_TOP, COLOR_BUTTON_HOVER_GRADIENT_BOTTOM);
+    }
+    setButtonDimensions(width, height) {
+      if (width) {
+        this.buttonWidth = width;
+      } else {
+        this.buttonWidth = this.text.width + this.paddingX;
+      }
+      if (height) {
+        this.buttonHeight = height;
+      } else {
+        this.buttonHeight = this.text.height + this.paddingY;
+      }
+    }
+    setClickable(value) {
+      this.interactive = value;
+      this.buttonMode = value;
+      if (!value) {
+        this.applyBackground();
+        this.removeAllListeners("pointerover");
+        this.removeAllListeners("pointerout");
+        this.removeAllListeners("click");
+      } else {
+        this.initListeners();
+      }
+    }
+    updateLabel(text) {
+      this.label = text;
+      this.text.text = text;
+      this.setButtonDimensions();
+      this.applyBackground();
+      this.applyShadow();
+      this.centerText();
+    }
+  };
+
+  // ts/Tile.ts
+  var Tile = class extends Button {
+    constructor(options) {
+      super({
+        label: options.letter.toUpperCase(),
+        x: options.x,
+        y: options.y,
+        width: TILE_W,
+        height: TILE_H,
+        fontSize: 60,
+        corner: 12,
+        clickable: options.clickable,
+        clickEventName: TILE_CLICK
+      });
+      this.animateIn = false;
+      this.letter = "";
+      this.letter = options.letter;
+      this.text.y += 3;
+      if (options.animateIn) {
+        this.animationEnter();
+      }
     }
     animationEnter() {
       this.alpha = 0;
@@ -28228,14 +28346,14 @@ void main() {
     animationSuccess() {
       return anime_es_default({
         targets: {
-          topColor: "#fff600",
-          bottomColor: "#D1AB00",
-          textColor: "#736200",
+          topColor: COLOR_BUTTON_GRADIENT_TOP,
+          bottomColor: COLOR_BUTTON_GRADIENT_BOTTOM,
+          textColor: COLOR_BUTTON_TEXT,
           y: this.y
         },
-        topColor: "#38FF38",
-        bottomColor: "#139A13",
-        textColor: "#073807",
+        topColor: COLOR_SUCCESS_GRADIENT_TOP,
+        bottomColor: COLOR_SUCCESS_GRADIENT_BOTTOM,
+        textColor: COLOR_SUCCESS_TEXT,
         y: "-=50",
         duration: 300,
         endDelay: 500,
@@ -28244,30 +28362,12 @@ void main() {
         loop: 1,
         update: (anim) => {
           const obj = anim.animatables[0].target;
-          this.applyTileBackground(rgbFunctionToHex(obj.topColor), rgbFunctionToHex(obj.bottomColor));
+          this.applyBackground(rgbFunctionToHex(obj.topColor), rgbFunctionToHex(obj.bottomColor));
           this.applyShadow(rgbFunctionToHex(obj.textColor, true));
           this.applyTextStyle(obj.textColor);
           this.y = obj.y;
         }
       });
-    }
-    getText() {
-      const text = new Text(this.letter.toUpperCase());
-      text.resolution = window.devicePixelRatio || 1;
-      text.anchor.set(0.5);
-      text.x = TILE_W2 / 2;
-      text.y = TILE_H2 / 2 + 3;
-      return text;
-    }
-    gradient(from, to) {
-      const c = document.createElement("canvas");
-      const ctx = c.getContext("2d");
-      const grd = ctx.createLinearGradient(TILE_W2, 0, TILE_W2, TILE_H2);
-      grd.addColorStop(0, from);
-      grd.addColorStop(1, to);
-      ctx.fillStyle = grd;
-      ctx.fillRect(0, 0, TILE_W2, TILE_H2);
-      return Texture.from(c);
     }
     moveToPosition(x, y) {
       const bounds = this.getBounds();
@@ -28288,38 +28388,33 @@ void main() {
         }
       });
     }
-    onHover() {
-      this.applyTileBackground("#FFFDC2", "#FFDA35");
-    }
-    setClickable(value) {
-      this.interactive = value;
-      this.buttonMode = value;
-      if (!value) {
-        this.applyTileBackground();
-      }
-    }
   };
 
   // ts/Game.ts
   var Game = class {
     constructor(ticker) {
+      this.animationGameEnter = null;
       this.app = null;
       this.bank = null;
       this.board = [];
       this.boardBg = null;
       this.combo = 0;
+      this.gameElements = null;
       this.getNextLetter = letterGenerator();
       this.h = VIEW_H;
       this.lastTime = 0;
+      this.playButton = null;
       this.preventClicksPromises = [];
       this.score = 0;
       this.ticker = null;
       this.tileEntryPoint = { x: 0, y: 0 };
-      this.turns = 75;
+      this.turns = INITIAL_TURNS;
       this.w = VIEW_W;
       this.wordList = [];
       this.text = {
+        finalScore: null,
         score: null,
+        title: null,
         turns: null,
         turnScore: null
       };
@@ -28327,20 +28422,14 @@ void main() {
         width: VIEW_W,
         height: VIEW_H,
         resolution: window.devicePixelRatio || 1,
-        backgroundColor: 52479
+        backgroundColor: utils_exports.string2hex(COLOR_BG)
       });
       this.ticker = ticker;
       document.querySelector("#app")?.append(this.app.view);
-      this.initBoardBg();
-      this.initBank();
-      this.initTextScore();
-      this.initTextTurnScore();
-      this.initTextTurns();
-      const entryPoint = this.boardBg.children.at(-1).getBounds();
-      this.tileEntryPoint = {
-        x: entryPoint.x,
-        y: entryPoint.y
-      };
+      this.initTitle();
+      this.initPlayButton();
+      this.initGameElements();
+      this.listenForPlayClick();
       this.listenForTileClick();
       this.ticker.add(this.update.bind(this));
       this.ticker.start();
@@ -28351,7 +28440,6 @@ void main() {
     }
     async checkForWord(start = 0) {
       const board = this.board.map((tile) => tile.letter).join("");
-      console.log("checkForWord", start, board.substring(start));
       for (let i = 0; i < this.wordList.length; i++) {
         const word = this.wordList[i];
         if (board.substring(start, word.length + start) === word) {
@@ -28362,9 +28450,41 @@ void main() {
       this.combo = 0;
     }
     async endGame() {
-      for (let i = 1; i < this.board.length - 2; i++) {
+      const done = this.preventClicksRequest();
+      for (let i = 0; i < this.board.length - 2; i++) {
         await this.checkForWord(i);
       }
+      this.animationGameEnter.reverse();
+      this.animationGameEnter.play();
+      await this.animationGameEnter.finished;
+      this.animationGameEnter.reverse();
+      if (!this.text.finalScore) {
+        this.text.finalScore = new Text2(`Final Score: ${this.score}`, {});
+        this.text.finalScore.anchor.set(0.5);
+        this.text.finalScore.x = VIEW_W / 2;
+        this.text.finalScore.y = VIEW_H / 2 - 90;
+        this.text.finalScore.alpha = 0;
+        this.addChild(this.text.finalScore);
+      } else {
+        this.text.finalScore.text = `Final Score: ${this.score}`;
+      }
+      anime_es_default({
+        targets: {
+          alpha: 0
+        },
+        alpha: 1,
+        duration: 300,
+        easing: "linear",
+        update: (anim) => {
+          const obj = anim.animatables[0].target;
+          this.text.finalScore.alpha = obj.alpha;
+          this.playButton.alpha = obj.alpha;
+        },
+        complete: () => {
+          this.playButton.setClickable(true);
+          done();
+        }
+      });
     }
     initBank() {
       this.bank = new Container();
@@ -28380,12 +28500,11 @@ void main() {
         const tile = new Tile({
           letter,
           x: TILE_W * 1.5 * i,
-          y: 0,
-          clickable: true
+          y: 0
         });
         this.bank.addChild(tile);
       });
-      this.addChild(this.bank);
+      this.gameElements.addChild(this.bank);
       this.bank.x = VIEW_W / 2 - this.bank.width / 2;
       this.bank.y = VIEW_H / 2 + TILE_H;
     }
@@ -28393,44 +28512,87 @@ void main() {
       this.boardBg = new Container();
       for (let i = 0; i < 7; i++) {
         const rect = new Graphics();
-        rect.beginFill(16777215);
+        rect.beginFill(utils_exports.string2hex(COLOR_SLOT));
         rect.drawRoundedRect(i * SLOT_W * 1.125, 0, SLOT_W, SLOT_H, 16);
         rect.endFill();
         rect.alpha = 0.5;
         this.boardBg.addChild(rect);
       }
-      this.addChild(this.boardBg);
+      this.gameElements.addChild(this.boardBg);
       this.boardBg.x = VIEW_W / 2 - this.boardBg.width / 2;
       this.boardBg.y = VIEW_H / 2 - TILE_H;
     }
+    initGame(animateIn = false) {
+      if (this.turns === 0) {
+        this.resetGame();
+      }
+      this.initBoardBg();
+      if (animateIn) {
+        this.gameElements.alpha = 0;
+      }
+      this.initBank();
+      this.initTextScore();
+      this.initTextTurnScore();
+      this.initTextTurns();
+      const entryPoint = this.boardBg.children.at(-1).getBounds();
+      this.tileEntryPoint = {
+        x: entryPoint.x,
+        y: entryPoint.y
+      };
+      if (animateIn) {
+        this.animationGameEnter = anime_es_default({
+          targets: {
+            alpha: 0
+          },
+          alpha: 1,
+          duration: 500,
+          easing: "linear",
+          update: (anim) => {
+            const obj = anim.animatables[0].target;
+            this.gameElements.alpha = obj.alpha;
+          }
+        });
+      }
+    }
+    initGameElements() {
+      this.gameElements = new Container();
+      this.gameElements.width = this.app.view.width;
+      this.gameElements.height = this.app.view.height;
+      this.addChild(this.gameElements);
+    }
+    initPlayButton() {
+      this.playButton = new Button({
+        label: "Play",
+        paddingX: 60,
+        paddingY: 20,
+        clickEventName: PLAY_CLICK
+      });
+      this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
+      this.playButton.y = VIEW_H / 2 - this.playButton.height / 2;
+      this.addChild(this.playButton);
+    }
     initTextScore() {
       this.text.score = new Text2("Score: 0", {
-        fontFamily: "Ships Whistle",
-        fontSize: 32,
-        align: "left",
-        fill: "#09596D"
+        align: "left"
       });
       this.text.score.x = 20;
       this.text.score.y = 20;
-      this.addChild(this.text.score);
+      this.gameElements.addChild(this.text.score);
     }
     initTextTurns() {
       this.text.turns = new Text2(`Turns: ${this.turns}`, {
-        fontFamily: "Ships Whistle",
-        fontSize: 32,
-        align: "left",
-        fill: "#09596D"
+        align: "left"
       });
       this.text.turns.x = VIEW_W / 2 - this.text.turns.width / 2;
       this.text.turns.y = VIEW_H - this.text.turns.height - 20;
-      this.addChild(this.text.turns);
+      this.gameElements.addChild(this.text.turns);
     }
     initTextTurnScore() {
       this.text.turnScore = new Text2("", {
         fontFamily: "Ships Whistle",
         fontSize: 32,
         align: "left",
-        fill: "#ffffff",
+        fill: COLOR_TEXT_TURN_SCORE,
         dropShadow: true,
         dropShadowColor: "#000000",
         dropShadowDistance: 3,
@@ -28441,7 +28603,55 @@ void main() {
       this.text.turnScore.x = this.boardBg.x + SLOT_W * 0.125;
       this.text.turnScore.y = this.boardBg.y - 80;
       this.text.turnScore.alpha = 0;
-      this.addChild(this.text.turnScore);
+      this.gameElements.addChild(this.text.turnScore);
+    }
+    initTitle() {
+      this.text.title = new Text2("Chain", {
+        fontFamily: "Ships Whistle",
+        fontSize: 84,
+        align: "center",
+        fill: COLOR_TITLE,
+        dropShadow: true,
+        dropShadowColor: "#000000",
+        dropShadowDistance: 3,
+        dropShadowAngle: 90,
+        dropShadowBlur: 3,
+        dropShadowAlpha: 0.33
+      });
+      this.text.title.x = VIEW_W / 2 - this.text.title.width / 2;
+      this.text.title.y = 100;
+      this.addChild(this.text.title);
+    }
+    listenForPlayClick() {
+      import_pubsub_js2.default.subscribe(PLAY_CLICK, () => {
+        this.playButton.setClickable(false);
+        this.initGame(true);
+        anime_es_default({
+          targets: {
+            alpha: 1,
+            y: this.text.title.y
+          },
+          alpha: {
+            value: 0,
+            duration: 150
+          },
+          y: 50,
+          duration: 500,
+          easing: "easeInOutSine",
+          update: (anim) => {
+            const obj = anim.animatables[0].target;
+            this.text.title.y = obj.y;
+            this.playButton.alpha = obj.alpha;
+            if (this.text.finalScore) {
+              this.text.finalScore.alpha = obj.alpha;
+            }
+          },
+          complete: (anim) => {
+            this.playButton.updateLabel("Play Again");
+            this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
+          }
+        });
+      });
     }
     listenForTileClick() {
       import_pubsub_js2.default.subscribe(TILE_CLICK, async (msg, tile) => {
@@ -28471,12 +28681,12 @@ void main() {
           if (this.board.length > 7) {
             this.board.shift();
           }
+          if (!this.turns) {
+            this.endGame();
+            return;
+          }
           if (this.board.length === 7) {
-            this.checkForWord().then(() => {
-              if (!this.turns) {
-                this.endGame();
-              }
-            });
+            this.checkForWord();
           }
         });
         if (this.turns > 4) {
@@ -28484,7 +28694,6 @@ void main() {
             letter: this.getNextLetter(),
             x: currentPosition.x,
             y: currentPosition.y,
-            clickable: true,
             animateIn: true
           });
           this.bank.addChild(newTile);
@@ -28502,8 +28711,13 @@ void main() {
       this.preventClicksPromises.push(request);
       return done;
     }
+    resetGame() {
+      this.gameElements.removeChildren();
+      this.board = [];
+      this.turns = INITIAL_TURNS;
+      this.score = 0;
+    }
     scoreWord(word, start = 0) {
-      console.log("scoreWord", word, start);
       return new Promise((resolve3, reject2) => {
         const tiles = this.board.slice(start, word.length + start);
         const done = this.preventClicksRequest();
@@ -28517,7 +28731,7 @@ void main() {
         this.text.score.text = `Score: ${this.score}`;
         const comboLabel = this.combo ? `Combo! x ${this.combo}` : "";
         this.text.turnScore.text = `+${score} ${comboLabel}`;
-        this.text.turnScore.x = VIEW_W / 2 - this.text.turns.width / 2 + start * SLOT_W * 1.125;
+        this.text.turnScore.x = this.boardBg.x + SLOT_W * 0.125 + start * SLOT_W * 1.125;
         const startingPosition = this.text.turnScore.y;
         this.text.turnScore.animate({
           targets: {

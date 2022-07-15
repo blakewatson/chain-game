@@ -1,12 +1,21 @@
+import anime, { AnimeInstance } from 'animejs';
 import {
   Application,
   Container,
   DisplayObject,
   Graphics,
-  Ticker
+  Ticker,
+  utils
 } from 'pixi.js';
 import PubSub from 'pubsub-js';
+import Button from './Button';
 import {
+  COLOR_BG,
+  COLOR_SLOT,
+  COLOR_TEXT_TURN_SCORE,
+  COLOR_TITLE,
+  INITIAL_TURNS,
+  PLAY_CLICK,
   SLOT_H,
   SLOT_W,
   TILE_CLICK,
@@ -19,25 +28,38 @@ import Text from './Text';
 import Tile from './Tile';
 import { getRandomLetter, letterGenerator } from './utils';
 
+interface ITextElements {
+  finalScore: Text | null;
+  score: Text | null;
+  title: Text | null;
+  turns: Text | null;
+  turnScore: Text | null;
+}
+
 export default class Game {
+  public animationGameEnter: AnimeInstance | null = null;
   public app: Application | null = null;
   public bank: Container | null = null;
   public board: Tile[] = [];
   public boardBg: Container | null = null;
   public combo = 0;
+  public gameElements: Container | null = null;
   public getNextLetter = letterGenerator();
   public h: number = VIEW_H;
   public lastTime: number = 0;
+  public playButton: Button | null = null;
   public preventClicksPromises: Promise<any>[] = [];
   public score = 0;
   public ticker: Ticker | null = null;
   public tileEntryPoint: { x: number; y: number } = { x: 0, y: 0 };
-  public turns = 75;
+  public turns = INITIAL_TURNS;
   public w: number = VIEW_W;
   public wordList: string[] = [];
 
-  public text: { [key: string]: Text | null } = {
+  public text: ITextElements = {
+    finalScore: null,
     score: null,
+    title: null,
     turns: null,
     turnScore: null
   };
@@ -47,26 +69,18 @@ export default class Game {
       width: VIEW_W,
       height: VIEW_H,
       resolution: window.devicePixelRatio || 1,
-      backgroundColor: 0x00ccff
+      backgroundColor: utils.string2hex(COLOR_BG)
     });
 
     this.ticker = ticker;
 
     document.querySelector('#app')?.append(this.app.view);
 
-    this.initBoardBg();
-    this.initBank();
-    this.initTextScore();
-    this.initTextTurnScore();
-    this.initTextTurns();
+    this.initTitle();
+    this.initPlayButton();
+    this.initGameElements();
 
-    // calculate the position where newly played tiles should go
-    const entryPoint = this.boardBg.children.at(-1).getBounds();
-    this.tileEntryPoint = {
-      x: entryPoint.x,
-      y: entryPoint.y
-    };
-
+    this.listenForPlayClick();
     this.listenForTileClick();
 
     this.ticker.add(this.update.bind(this));
@@ -81,7 +95,6 @@ export default class Game {
 
   public async checkForWord(start = 0) {
     const board = this.board.map((tile) => tile.letter).join('');
-    console.log('checkForWord', start, board.substring(start));
 
     for (let i = 0; i < this.wordList.length; i++) {
       const word = this.wordList[i];
@@ -96,9 +109,50 @@ export default class Game {
   }
 
   public async endGame() {
-    for (let i = 1; i < this.board.length - 2; i++) {
+    const done = this.preventClicksRequest();
+
+    for (let i = 0; i < this.board.length - 2; i++) {
       await this.checkForWord(i);
     }
+
+    // fade out game elements
+    this.animationGameEnter.reverse();
+    this.animationGameEnter.play();
+    await this.animationGameEnter.finished;
+    this.animationGameEnter.reverse();
+
+    // create final score text if needed
+    if (!this.text.finalScore) {
+      this.text.finalScore = new Text(`Final Score: ${this.score}`, {});
+      this.text.finalScore.anchor.set(0.5);
+      this.text.finalScore.x = VIEW_W / 2;
+      this.text.finalScore.y = VIEW_H / 2 - 90;
+      this.text.finalScore.alpha = 0;
+      this.addChild(this.text.finalScore);
+    } else {
+      this.text.finalScore.text = `Final Score: ${this.score}`;
+    }
+
+    // fade in end scene
+    anime({
+      targets: {
+        alpha: 0
+      },
+      alpha: 1,
+      duration: 300,
+      easing: 'linear',
+
+      update: (anim) => {
+        const obj = anim.animatables[0].target as any;
+        this.text.finalScore.alpha = obj.alpha;
+        this.playButton.alpha = obj.alpha;
+      },
+
+      complete: () => {
+        this.playButton.setClickable(true);
+        done();
+      }
+    });
   }
 
   public initBank() {
@@ -119,14 +173,13 @@ export default class Game {
       const tile = new Tile({
         letter,
         x: TILE_W * 1.5 * i,
-        y: 0,
-        clickable: true
+        y: 0
       });
 
       this.bank.addChild(tile);
     });
 
-    this.addChild(this.bank);
+    this.gameElements.addChild(this.bank);
     this.bank.x = VIEW_W / 2 - this.bank.width / 2;
     this.bank.y = VIEW_H / 2 + TILE_H;
   }
@@ -136,44 +189,99 @@ export default class Game {
 
     for (let i = 0; i < 7; i++) {
       const rect = new Graphics();
-      rect.beginFill(0xffffff);
+      rect.beginFill(utils.string2hex(COLOR_SLOT));
       rect.drawRoundedRect(i * SLOT_W * 1.125, 0, SLOT_W, SLOT_H, 16);
       rect.endFill();
       rect.alpha = 0.5;
       this.boardBg.addChild(rect);
     }
 
-    this.addChild(this.boardBg);
+    this.gameElements.addChild(this.boardBg);
     this.boardBg.x = VIEW_W / 2 - this.boardBg.width / 2;
     this.boardBg.y = VIEW_H / 2 - TILE_H;
   }
 
+  public initGame(animateIn: boolean = false) {
+    if (this.turns === 0) {
+      this.resetGame();
+    }
+
+    this.initBoardBg();
+
+    if (animateIn) {
+      this.gameElements.alpha = 0;
+    }
+
+    this.initBank();
+    this.initTextScore();
+    this.initTextTurnScore();
+    this.initTextTurns();
+
+    // calculate the position where newly played tiles should go
+    const entryPoint = this.boardBg.children.at(-1).getBounds();
+    this.tileEntryPoint = {
+      x: entryPoint.x,
+      y: entryPoint.y
+    };
+
+    if (animateIn) {
+      this.animationGameEnter = anime({
+        targets: {
+          alpha: 0
+        },
+        alpha: 1,
+        duration: 500,
+        easing: 'linear',
+
+        update: (anim) => {
+          const obj = anim.animatables[0].target as any;
+          this.gameElements.alpha = obj.alpha;
+        }
+      });
+    }
+  }
+
+  public initGameElements() {
+    this.gameElements = new Container();
+    this.gameElements.width = this.app.view.width;
+    this.gameElements.height = this.app.view.height;
+    this.addChild(this.gameElements);
+  }
+
+  public initPlayButton() {
+    this.playButton = new Button({
+      label: 'Play',
+      paddingX: 60,
+      paddingY: 20,
+      clickEventName: PLAY_CLICK
+    });
+
+    this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
+    this.playButton.y = VIEW_H / 2 - this.playButton.height / 2;
+
+    this.addChild(this.playButton);
+  }
+
   public initTextScore() {
     this.text.score = new Text('Score: 0', {
-      fontFamily: 'Ships Whistle',
-      fontSize: 32,
-      align: 'left',
-      fill: '#09596D'
+      align: 'left'
     });
 
     this.text.score.x = 20;
     this.text.score.y = 20;
 
-    this.addChild(this.text.score);
+    this.gameElements.addChild(this.text.score);
   }
 
   public initTextTurns() {
     this.text.turns = new Text(`Turns: ${this.turns}`, {
-      fontFamily: 'Ships Whistle',
-      fontSize: 32,
-      align: 'left',
-      fill: '#09596D'
+      align: 'left'
     });
 
     this.text.turns.x = VIEW_W / 2 - this.text.turns.width / 2;
     this.text.turns.y = VIEW_H - this.text.turns.height - 20;
 
-    this.addChild(this.text.turns);
+    this.gameElements.addChild(this.text.turns);
   }
 
   public initTextTurnScore() {
@@ -181,7 +289,7 @@ export default class Game {
       fontFamily: 'Ships Whistle',
       fontSize: 32,
       align: 'left',
-      fill: '#ffffff',
+      fill: COLOR_TEXT_TURN_SCORE,
       dropShadow: true,
       dropShadowColor: '#000000',
       dropShadowDistance: 3,
@@ -194,7 +302,65 @@ export default class Game {
     this.text.turnScore.y = this.boardBg.y - 80;
     this.text.turnScore.alpha = 0;
 
-    this.addChild(this.text.turnScore);
+    this.gameElements.addChild(this.text.turnScore);
+  }
+
+  public initTitle() {
+    this.text.title = new Text('Chain', {
+      fontFamily: 'Ships Whistle',
+      fontSize: 84,
+      align: 'center',
+      fill: COLOR_TITLE,
+      // stroke: '#BAB108',
+      // strokeThickness: 4,
+      dropShadow: true,
+      dropShadowColor: '#000000',
+      dropShadowDistance: 3,
+      dropShadowAngle: 90,
+      dropShadowBlur: 3,
+      dropShadowAlpha: 0.33
+    });
+
+    this.text.title.x = VIEW_W / 2 - this.text.title.width / 2;
+    this.text.title.y = 100;
+
+    this.addChild(this.text.title);
+  }
+
+  public listenForPlayClick() {
+    PubSub.subscribe(PLAY_CLICK, () => {
+      this.playButton.setClickable(false);
+      this.initGame(true);
+
+      anime({
+        targets: {
+          alpha: 1,
+          y: this.text.title.y
+        },
+        alpha: {
+          value: 0,
+          duration: 150
+        },
+        y: 50,
+        duration: 500,
+        easing: 'easeInOutSine',
+
+        update: (anim) => {
+          const obj = anim.animatables[0].target as any;
+          this.text.title.y = obj.y;
+          this.playButton.alpha = obj.alpha;
+
+          if (this.text.finalScore) {
+            this.text.finalScore.alpha = obj.alpha;
+          }
+        },
+
+        complete: (anim) => {
+          this.playButton.updateLabel('Play Again');
+          this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
+        }
+      });
+    });
   }
 
   public listenForTileClick() {
@@ -245,12 +411,13 @@ export default class Game {
           this.board.shift();
         }
 
+        if (!this.turns) {
+          this.endGame();
+          return;
+        }
+
         if (this.board.length === 7) {
-          this.checkForWord().then(() => {
-            if (!this.turns) {
-              this.endGame();
-            }
-          });
+          this.checkForWord();
         }
       });
 
@@ -261,7 +428,6 @@ export default class Game {
           letter: this.getNextLetter(),
           x: currentPosition.x,
           y: currentPosition.y,
-          clickable: true,
           animateIn: true
         });
 
@@ -288,8 +454,16 @@ export default class Game {
     return done;
   }
 
+  public resetGame() {
+    this.gameElements.removeChildren();
+
+    this.board = [];
+
+    this.turns = INITIAL_TURNS;
+    this.score = 0;
+  }
+
   public scoreWord(word: string, start: number = 0) {
-    console.log('scoreWord', word, start);
     return new Promise((resolve, reject) => {
       // animate word
       const tiles = this.board.slice(start, word.length + start);
@@ -313,7 +487,7 @@ export default class Game {
       const comboLabel = this.combo ? `Combo! x ${this.combo}` : '';
       this.text.turnScore.text = `+${score} ${comboLabel}`;
       this.text.turnScore.x =
-        VIEW_W / 2 - this.text.turns.width / 2 + start * SLOT_W * 1.125;
+        this.boardBg.x + SLOT_W * 0.125 + start * SLOT_W * 1.125;
 
       const startingPosition = this.text.turnScore.y;
 
