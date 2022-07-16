@@ -28037,7 +28037,7 @@ void main() {
   // ts/constants.ts
   var VIEW_W = 800;
   var VIEW_H = 600;
-  var INITIAL_TURNS = 50;
+  var INITIAL_TURNS = 10;
   var COLOR_YELLOW = "#fcf100";
   var COLOR_WHITE = "#ffffff";
   var COLOR_BG = "#00ccff";
@@ -28407,6 +28407,7 @@ void main() {
       this.helpButton = null;
       this.helpSlide = new Container();
       this.lastTime = 0;
+      this.menuElements = new Container();
       this.playButton = null;
       this.preventClicksPromises = [];
       this.resources = null;
@@ -28417,6 +28418,7 @@ void main() {
       this.w = VIEW_W;
       this.wordList = [];
       this.text = {
+        credits: null,
         finalScore: null,
         score: null,
         title: null,
@@ -28433,8 +28435,7 @@ void main() {
       this.resources = resources2;
       document.querySelector("#app")?.append(this.app.view);
       this.initTitle();
-      this.initPlayButton();
-      this.initHelpButton();
+      this.initMenuElements();
       this.initGameElements();
       this.listenForHelpClick();
       this.listenForPlayClick();
@@ -28486,9 +28487,10 @@ void main() {
           easing: "easeInOutSine",
           update: (anim) => {
             const obj = anim.animatables[0].target;
-            this.playButton.alpha = obj.alpha;
-            this.helpButton.alpha = obj.alpha;
-            this.text.title.y = obj.y;
+            this.menuElements.alpha = obj.alpha;
+            if (!this.text.finalScore) {
+              this.text.title.y = obj.y;
+            }
           },
           complete: (anim) => {
             this.playButton.setClickable(true);
@@ -28511,8 +28513,7 @@ void main() {
         this.text.finalScore.anchor.set(0.5);
         this.text.finalScore.x = VIEW_W / 2;
         this.text.finalScore.y = VIEW_H / 2 - 90;
-        this.text.finalScore.alpha = 0;
-        this.addChild(this.text.finalScore);
+        this.menuElements.addChild(this.text.finalScore);
       } else {
         this.text.finalScore.text = `Final Score: ${this.score}`;
       }
@@ -28525,9 +28526,7 @@ void main() {
         easing: "linear",
         update: (anim) => {
           const obj = anim.animatables[0].target;
-          this.text.finalScore.alpha = obj.alpha;
-          this.playButton.alpha = obj.alpha;
-          this.helpButton.alpha = obj.alpha;
+          this.menuElements.alpha = obj.alpha;
         },
         complete: () => {
           this.playButton.setClickable(true);
@@ -28571,6 +28570,22 @@ void main() {
       this.gameElements.addChild(this.boardBg);
       this.boardBg.x = VIEW_W / 2 - this.boardBg.width / 2;
       this.boardBg.y = VIEW_H / 2 - TILE_H;
+    }
+    initCredits() {
+      this.text.credits = new Text2("created by Tim and Blake Watson", {
+        fill: COLOR_WHITE,
+        fontSize: 24,
+        dropShadow: true,
+        dropShadowAngle: 90,
+        dropShadowBlur: 3,
+        dropShadowDistance: 3,
+        dropShadowColor: "#000000",
+        dropShadowAlpha: 0.33
+      });
+      this.text.credits.anchor.set(0.5);
+      this.text.credits.x = VIEW_W / 2;
+      this.text.credits.y = VIEW_H - this.text.credits.height - 20;
+      this.menuElements.addChild(this.text.credits);
     }
     initGame(animateIn = false) {
       if (this.turns === 0) {
@@ -28617,8 +28632,16 @@ void main() {
       });
       this.helpButton.x = VIEW_W / 2 - this.helpButton.width / 2;
       this.helpButton.y = VIEW_H / 2 + this.helpButton.height;
-      this.addChild(this.helpButton);
+      this.menuElements.addChild(this.helpButton);
       this.addChild(this.helpSlide);
+    }
+    initMenuElements() {
+      this.menuElements.width = this.app.view.width;
+      this.menuElements.height = this.app.view.height;
+      this.initPlayButton();
+      this.initHelpButton();
+      this.initCredits();
+      this.addChild(this.menuElements);
     }
     initPlayButton() {
       this.playButton = new Button({
@@ -28627,7 +28650,7 @@ void main() {
       });
       this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
       this.playButton.y = VIEW_H / 2 - this.playButton.height / 2;
-      this.addChild(this.playButton);
+      this.menuElements.addChild(this.playButton);
     }
     initTextScore() {
       this.text.score = new Text2("Score: 0", {
@@ -28700,11 +28723,7 @@ void main() {
           update: (anim) => {
             const obj = anim.animatables[0].target;
             this.text.title.y = obj.y;
-            this.playButton.alpha = obj.alpha;
-            this.helpButton.alpha = obj.alpha;
-            if (this.text.finalScore) {
-              this.text.finalScore.alpha = obj.alpha;
-            }
+            this.menuElements.alpha = obj.alpha;
           },
           complete: () => {
             this.drawHelpScreen();
@@ -28733,11 +28752,7 @@ void main() {
           update: (anim) => {
             const obj = anim.animatables[0].target;
             this.text.title.y = obj.y;
-            this.playButton.alpha = obj.alpha;
-            this.helpButton.alpha = obj.alpha;
-            if (this.text.finalScore) {
-              this.text.finalScore.alpha = obj.alpha;
-            }
+            this.menuElements.alpha = obj.alpha;
           },
           complete: (anim) => {
             this.playButton.updateLabel("Play Again");

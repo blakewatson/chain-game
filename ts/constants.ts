@@ -2,7 +2,7 @@ export const VIEW_W = 800;
 export const VIEW_H = 600;
 
 // Game rules and mechanics
-export const INITIAL_TURNS = 50;
+export const INITIAL_TURNS = 10;
 
 // Colors
 export const COLOR_YELLOW = '#fcf100';

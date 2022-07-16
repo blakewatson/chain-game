@@ -17,6 +17,7 @@ import {
   COLOR_SLOT,
   COLOR_TEXT_TURN_SCORE,
   COLOR_TITLE,
+  COLOR_WHITE,
   HELP_CLICK,
   INITIAL_TURNS,
   PLAY_CLICK,
@@ -33,6 +34,7 @@ import Tile from './Tile';
 import { getRandomLetter, letterGenerator } from './utils';
 
 interface ITextElements {
+  credits: Text | null;
   finalScore: Text | null;
   score: Text | null;
   title: Text | null;
@@ -53,6 +55,7 @@ export default class Game {
   public helpButton: Button | null = null;
   public helpSlide: Container = new Container();
   public lastTime: number = 0;
+  public menuElements: Container = new Container();
   public playButton: Button | null = null;
   public preventClicksPromises: Promise<any>[] = [];
   public resources: Dict<LoaderResource> | null = null;
@@ -64,6 +67,7 @@ export default class Game {
   public wordList: string[] = [];
 
   public text: ITextElements = {
+    credits: null,
     finalScore: null,
     score: null,
     title: null,
@@ -85,8 +89,7 @@ export default class Game {
     document.querySelector('#app')?.append(this.app.view);
 
     this.initTitle();
-    this.initPlayButton();
-    this.initHelpButton();
+    this.initMenuElements();
     this.initGameElements();
 
     this.listenForHelpClick();
@@ -150,9 +153,11 @@ export default class Game {
 
         update: (anim) => {
           const obj = anim.animatables[0].target as any;
-          this.playButton.alpha = obj.alpha;
-          this.helpButton.alpha = obj.alpha;
-          this.text.title.y = obj.y;
+          this.menuElements.alpha = obj.alpha;
+
+          if (!this.text.finalScore) {
+            this.text.title.y = obj.y;
+          }
         },
 
         complete: (anim) => {
@@ -182,8 +187,7 @@ export default class Game {
       this.text.finalScore.anchor.set(0.5);
       this.text.finalScore.x = VIEW_W / 2;
       this.text.finalScore.y = VIEW_H / 2 - 90;
-      this.text.finalScore.alpha = 0;
-      this.addChild(this.text.finalScore);
+      this.menuElements.addChild(this.text.finalScore);
     } else {
       this.text.finalScore.text = `Final Score: ${this.score}`;
     }
@@ -199,9 +203,7 @@ export default class Game {
 
       update: (anim) => {
         const obj = anim.animatables[0].target as any;
-        this.text.finalScore.alpha = obj.alpha;
-        this.playButton.alpha = obj.alpha;
-        this.helpButton.alpha = obj.alpha;
+        this.menuElements.alpha = obj.alpha;
       },
 
       complete: () => {
@@ -256,6 +258,25 @@ export default class Game {
     this.gameElements.addChild(this.boardBg);
     this.boardBg.x = VIEW_W / 2 - this.boardBg.width / 2;
     this.boardBg.y = VIEW_H / 2 - TILE_H;
+  }
+
+  public initCredits() {
+    this.text.credits = new Text('created by Tim and Blake Watson', {
+      fill: COLOR_WHITE,
+      fontSize: 24,
+      dropShadow: true,
+      dropShadowAngle: 90,
+      dropShadowBlur: 3,
+      dropShadowDistance: 3,
+      dropShadowColor: '#000000',
+      dropShadowAlpha: 0.33
+    });
+
+    this.text.credits.anchor.set(0.5);
+    this.text.credits.x = VIEW_W / 2;
+    this.text.credits.y = VIEW_H - this.text.credits.height - 20;
+
+    this.menuElements.addChild(this.text.credits);
   }
 
   public initGame(animateIn: boolean = false) {
@@ -314,8 +335,19 @@ export default class Game {
     this.helpButton.x = VIEW_W / 2 - this.helpButton.width / 2;
     this.helpButton.y = VIEW_H / 2 + this.helpButton.height;
 
-    this.addChild(this.helpButton);
+    this.menuElements.addChild(this.helpButton);
     this.addChild(this.helpSlide);
+  }
+
+  public initMenuElements() {
+    this.menuElements.width = this.app.view.width;
+    this.menuElements.height = this.app.view.height;
+
+    this.initPlayButton();
+    this.initHelpButton();
+    this.initCredits();
+
+    this.addChild(this.menuElements);
   }
 
   public initPlayButton() {
@@ -327,7 +359,7 @@ export default class Game {
     this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
     this.playButton.y = VIEW_H / 2 - this.playButton.height / 2;
 
-    this.addChild(this.playButton);
+    this.menuElements.addChild(this.playButton);
   }
 
   public initTextScore() {
@@ -418,12 +450,7 @@ export default class Game {
         update: (anim) => {
           const obj = anim.animatables[0].target as any;
           this.text.title.y = obj.y;
-          this.playButton.alpha = obj.alpha;
-          this.helpButton.alpha = obj.alpha;
-
-          if (this.text.finalScore) {
-            this.text.finalScore.alpha = obj.alpha;
-          }
+          this.menuElements.alpha = obj.alpha;
         },
 
         complete: () => {
@@ -456,12 +483,7 @@ export default class Game {
         update: (anim) => {
           const obj = anim.animatables[0].target as any;
           this.text.title.y = obj.y;
-          this.playButton.alpha = obj.alpha;
-          this.helpButton.alpha = obj.alpha;
-
-          if (this.text.finalScore) {
-            this.text.finalScore.alpha = obj.alpha;
-          }
+          this.menuElements.alpha = obj.alpha;
         },
 
         complete: (anim) => {
