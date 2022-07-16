@@ -1,9 +1,12 @@
+import { Dict } from '@pixi/utils';
 import anime, { AnimeInstance } from 'animejs';
 import {
   Application,
   Container,
   DisplayObject,
   Graphics,
+  LoaderResource,
+  Sprite,
   Ticker,
   utils
 } from 'pixi.js';
@@ -14,6 +17,7 @@ import {
   COLOR_SLOT,
   COLOR_TEXT_TURN_SCORE,
   COLOR_TITLE,
+  HELP_CLICK,
   INITIAL_TURNS,
   PLAY_CLICK,
   SLOT_H,
@@ -46,9 +50,12 @@ export default class Game {
   public gameElements: Container | null = null;
   public getNextLetter = letterGenerator();
   public h: number = VIEW_H;
+  public helpButton: Button | null = null;
+  public helpSlide: Container = new Container();
   public lastTime: number = 0;
   public playButton: Button | null = null;
   public preventClicksPromises: Promise<any>[] = [];
+  public resources: Dict<LoaderResource> | null = null;
   public score = 0;
   public ticker: Ticker | null = null;
   public tileEntryPoint: { x: number; y: number } = { x: 0, y: 0 };
@@ -64,7 +71,7 @@ export default class Game {
     turnScore: null
   };
 
-  constructor(ticker: Ticker) {
+  constructor(ticker: Ticker, resources: Dict<LoaderResource>) {
     this.app = new Application({
       width: VIEW_W,
       height: VIEW_H,
@@ -73,13 +80,16 @@ export default class Game {
     });
 
     this.ticker = ticker;
+    this.resources = resources;
 
     document.querySelector('#app')?.append(this.app.view);
 
     this.initTitle();
     this.initPlayButton();
+    this.initHelpButton();
     this.initGameElements();
 
+    this.listenForHelpClick();
     this.listenForPlayClick();
     this.listenForTileClick();
 
@@ -106,6 +116,51 @@ export default class Game {
     }
 
     this.combo = 0;
+  }
+
+  public drawHelpScreen(screen: 1 | 2 = 1) {
+    const key = screen === 1 ? 'help_1' : 'help_2';
+    const helpImg = new Sprite(this.resources[key].texture);
+    helpImg.width = VIEW_W;
+    helpImg.height = VIEW_H;
+    helpImg.buttonMode = true;
+    helpImg.interactive = true;
+    this.helpSlide.addChild(helpImg);
+    helpImg.addListener('click', () => {
+      this.helpSlide.removeChild(helpImg);
+
+      if (screen === 1) {
+        this.drawHelpScreen(2);
+        return;
+      }
+
+      anime({
+        targets: {
+          alpha: 0,
+          y: this.text.title.y
+        },
+        alpha: {
+          value: 1,
+          duration: 150,
+          easing: 'linear'
+        },
+        y: '+=50',
+        duration: 500,
+        easing: 'easeInOutSine',
+
+        update: (anim) => {
+          const obj = anim.animatables[0].target as any;
+          this.playButton.alpha = obj.alpha;
+          this.helpButton.alpha = obj.alpha;
+          this.text.title.y = obj.y;
+        },
+
+        complete: (anim) => {
+          this.playButton.setClickable(true);
+          this.helpButton.setClickable(true);
+        }
+      });
+    });
   }
 
   public async endGame() {
@@ -146,10 +201,12 @@ export default class Game {
         const obj = anim.animatables[0].target as any;
         this.text.finalScore.alpha = obj.alpha;
         this.playButton.alpha = obj.alpha;
+        this.helpButton.alpha = obj.alpha;
       },
 
       complete: () => {
         this.playButton.setClickable(true);
+        this.helpButton.setClickable(true);
         done();
       }
     });
@@ -248,11 +305,22 @@ export default class Game {
     this.addChild(this.gameElements);
   }
 
+  public initHelpButton() {
+    this.helpButton = new Button({
+      label: 'How to play',
+      clickEventName: HELP_CLICK
+    });
+
+    this.helpButton.x = VIEW_W / 2 - this.helpButton.width / 2;
+    this.helpButton.y = VIEW_H / 2 + this.helpButton.height;
+
+    this.addChild(this.helpButton);
+    this.addChild(this.helpSlide);
+  }
+
   public initPlayButton() {
     this.playButton = new Button({
       label: 'Play',
-      paddingX: 60,
-      paddingY: 20,
       clickEventName: PLAY_CLICK
     });
 
@@ -327,11 +395,12 @@ export default class Game {
     this.addChild(this.text.title);
   }
 
-  public listenForPlayClick() {
-    PubSub.subscribe(PLAY_CLICK, () => {
+  public listenForHelpClick() {
+    PubSub.subscribe(HELP_CLICK, () => {
       this.playButton.setClickable(false);
-      this.initGame(true);
+      this.helpButton.setClickable(false);
 
+      // fade out menu buttons
       anime({
         targets: {
           alpha: 1,
@@ -339,7 +408,8 @@ export default class Game {
         },
         alpha: {
           value: 0,
-          duration: 150
+          duration: 150,
+          easing: 'linear'
         },
         y: 50,
         duration: 500,
@@ -349,6 +419,45 @@ export default class Game {
           const obj = anim.animatables[0].target as any;
           this.text.title.y = obj.y;
           this.playButton.alpha = obj.alpha;
+          this.helpButton.alpha = obj.alpha;
+
+          if (this.text.finalScore) {
+            this.text.finalScore.alpha = obj.alpha;
+          }
+        },
+
+        complete: () => {
+          this.drawHelpScreen();
+        }
+      });
+    });
+  }
+
+  public listenForPlayClick() {
+    PubSub.subscribe(PLAY_CLICK, () => {
+      this.playButton.setClickable(false);
+      this.helpButton.setClickable(false);
+      this.initGame(true);
+
+      anime({
+        targets: {
+          alpha: 1,
+          y: this.text.title.y
+        },
+        alpha: {
+          value: 0,
+          duration: 150,
+          easing: 'linear'
+        },
+        y: 50,
+        duration: 500,
+        easing: 'easeInOutSine',
+
+        update: (anim) => {
+          const obj = anim.animatables[0].target as any;
+          this.text.title.y = obj.y;
+          this.playButton.alpha = obj.alpha;
+          this.helpButton.alpha = obj.alpha;
 
           if (this.text.finalScore) {
             this.text.finalScore.alpha = obj.alpha;

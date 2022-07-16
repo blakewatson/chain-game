@@ -15880,7 +15880,7 @@
     return xhr.toString().replace("object ", "");
   }
   var LoaderResource = function() {
-    function LoaderResource2(name, url2, options) {
+    function LoaderResource4(name, url2, options) {
       this._dequeue = _noop$1;
       this._onLoadBinding = null;
       this._elementTimer = 0;
@@ -15897,7 +15897,7 @@
       }
       options = options || {};
       this._flags = 0;
-      this._setFlag(LoaderResource2.STATUS_FLAGS.DATA_URL, url2.indexOf("data:") === 0);
+      this._setFlag(LoaderResource4.STATUS_FLAGS.DATA_URL, url2.indexOf("data:") === 0);
       this.name = name;
       this.url = url2;
       this.extension = this._getExtension();
@@ -15910,7 +15910,7 @@
       this.error = null;
       this.xhr = null;
       this.children = [];
-      this.type = LoaderResource2.TYPE.UNKNOWN;
+      this.type = LoaderResource4.TYPE.UNKNOWN;
       this.progressChunk = 0;
       this._dequeue = _noop$1;
       this._onLoadBinding = null;
@@ -15928,38 +15928,38 @@
       this.onComplete = new Signal();
       this.onAfterMiddleware = new Signal();
     }
-    LoaderResource2.setExtensionLoadType = function(extname, loadType) {
-      setExtMap(LoaderResource2._loadTypeMap, extname, loadType);
+    LoaderResource4.setExtensionLoadType = function(extname, loadType) {
+      setExtMap(LoaderResource4._loadTypeMap, extname, loadType);
     };
-    LoaderResource2.setExtensionXhrType = function(extname, xhrType) {
-      setExtMap(LoaderResource2._xhrTypeMap, extname, xhrType);
+    LoaderResource4.setExtensionXhrType = function(extname, xhrType) {
+      setExtMap(LoaderResource4._xhrTypeMap, extname, xhrType);
     };
-    Object.defineProperty(LoaderResource2.prototype, "isDataUrl", {
+    Object.defineProperty(LoaderResource4.prototype, "isDataUrl", {
       get: function() {
-        return this._hasFlag(LoaderResource2.STATUS_FLAGS.DATA_URL);
+        return this._hasFlag(LoaderResource4.STATUS_FLAGS.DATA_URL);
       },
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(LoaderResource2.prototype, "isComplete", {
+    Object.defineProperty(LoaderResource4.prototype, "isComplete", {
       get: function() {
-        return this._hasFlag(LoaderResource2.STATUS_FLAGS.COMPLETE);
+        return this._hasFlag(LoaderResource4.STATUS_FLAGS.COMPLETE);
       },
       enumerable: false,
       configurable: true
     });
-    Object.defineProperty(LoaderResource2.prototype, "isLoading", {
+    Object.defineProperty(LoaderResource4.prototype, "isLoading", {
       get: function() {
-        return this._hasFlag(LoaderResource2.STATUS_FLAGS.LOADING);
+        return this._hasFlag(LoaderResource4.STATUS_FLAGS.LOADING);
       },
       enumerable: false,
       configurable: true
     });
-    LoaderResource2.prototype.complete = function() {
+    LoaderResource4.prototype.complete = function() {
       this._clearEvents();
       this._finish();
     };
-    LoaderResource2.prototype.abort = function(message) {
+    LoaderResource4.prototype.abort = function(message) {
       if (this.error) {
         return;
       }
@@ -15971,7 +15971,7 @@
         this.xdr.abort();
       } else if (this.data) {
         if (this.data.src) {
-          this.data.src = LoaderResource2.EMPTY_GIF;
+          this.data.src = LoaderResource4.EMPTY_GIF;
         } else {
           while (this.data.firstChild) {
             this.data.removeChild(this.data.firstChild);
@@ -15980,7 +15980,7 @@
       }
       this._finish();
     };
-    LoaderResource2.prototype.load = function(cb) {
+    LoaderResource4.prototype.load = function(cb) {
       var _this = this;
       if (this.isLoading) {
         return;
@@ -15995,25 +15995,25 @@
       } else if (cb) {
         this.onComplete.once(cb);
       }
-      this._setFlag(LoaderResource2.STATUS_FLAGS.LOADING, true);
+      this._setFlag(LoaderResource4.STATUS_FLAGS.LOADING, true);
       this.onStart.dispatch(this);
       if (this.crossOrigin === false || typeof this.crossOrigin !== "string") {
         this.crossOrigin = this._determineCrossOrigin(this.url);
       }
       switch (this.loadType) {
-        case LoaderResource2.LOAD_TYPE.IMAGE:
-          this.type = LoaderResource2.TYPE.IMAGE;
+        case LoaderResource4.LOAD_TYPE.IMAGE:
+          this.type = LoaderResource4.TYPE.IMAGE;
           this._loadElement("image");
           break;
-        case LoaderResource2.LOAD_TYPE.AUDIO:
-          this.type = LoaderResource2.TYPE.AUDIO;
+        case LoaderResource4.LOAD_TYPE.AUDIO:
+          this.type = LoaderResource4.TYPE.AUDIO;
           this._loadSourceElement("audio");
           break;
-        case LoaderResource2.LOAD_TYPE.VIDEO:
-          this.type = LoaderResource2.TYPE.VIDEO;
+        case LoaderResource4.LOAD_TYPE.VIDEO:
+          this.type = LoaderResource4.TYPE.VIDEO;
           this._loadSourceElement("video");
           break;
-        case LoaderResource2.LOAD_TYPE.XHR:
+        case LoaderResource4.LOAD_TYPE.XHR:
         default:
           if (typeof useXdr === "undefined") {
             useXdr = !!(globalThis.XDomainRequest && !("withCredentials" in new XMLHttpRequest()));
@@ -16026,13 +16026,13 @@
           break;
       }
     };
-    LoaderResource2.prototype._hasFlag = function(flag) {
+    LoaderResource4.prototype._hasFlag = function(flag) {
       return (this._flags & flag) !== 0;
     };
-    LoaderResource2.prototype._setFlag = function(flag, value) {
+    LoaderResource4.prototype._setFlag = function(flag, value) {
       this._flags = value ? this._flags | flag : this._flags & ~flag;
     };
-    LoaderResource2.prototype._clearEvents = function() {
+    LoaderResource4.prototype._clearEvents = function() {
       clearTimeout(this._elementTimer);
       if (this.data && this.data.removeEventListener) {
         this.data.removeEventListener("error", this._boundOnError, false);
@@ -16055,15 +16055,15 @@
         }
       }
     };
-    LoaderResource2.prototype._finish = function() {
+    LoaderResource4.prototype._finish = function() {
       if (this.isComplete) {
         throw new Error("Complete called again for an already completed resource.");
       }
-      this._setFlag(LoaderResource2.STATUS_FLAGS.COMPLETE, true);
-      this._setFlag(LoaderResource2.STATUS_FLAGS.LOADING, false);
+      this._setFlag(LoaderResource4.STATUS_FLAGS.COMPLETE, true);
+      this._setFlag(LoaderResource4.STATUS_FLAGS.LOADING, false);
       this.onComplete.dispatch(this);
     };
-    LoaderResource2.prototype._loadElement = function(type) {
+    LoaderResource4.prototype._loadElement = function(type) {
       if (this.metadata.loadElement) {
         this.data = this.metadata.loadElement;
       } else if (type === "image" && typeof globalThis.Image !== "undefined") {
@@ -16084,7 +16084,7 @@
         this._elementTimer = setTimeout(this._boundOnTimeout, this.timeout);
       }
     };
-    LoaderResource2.prototype._loadSourceElement = function(type) {
+    LoaderResource4.prototype._loadSourceElement = function(type) {
       if (this.metadata.loadElement) {
         this.data = this.metadata.loadElement;
       } else if (type === "audio" && typeof globalThis.Audio !== "undefined") {
@@ -16121,7 +16121,7 @@
         this._elementTimer = setTimeout(this._boundOnTimeout, this.timeout);
       }
     };
-    LoaderResource2.prototype._loadXhr = function() {
+    LoaderResource4.prototype._loadXhr = function() {
       if (typeof this.xhrType !== "string") {
         this.xhrType = this._determineXhrType();
       }
@@ -16131,8 +16131,8 @@
       }
       xhr.open("GET", this.url, true);
       xhr.timeout = this.timeout;
-      if (this.xhrType === LoaderResource2.XHR_RESPONSE_TYPE.JSON || this.xhrType === LoaderResource2.XHR_RESPONSE_TYPE.DOCUMENT) {
-        xhr.responseType = LoaderResource2.XHR_RESPONSE_TYPE.TEXT;
+      if (this.xhrType === LoaderResource4.XHR_RESPONSE_TYPE.JSON || this.xhrType === LoaderResource4.XHR_RESPONSE_TYPE.DOCUMENT) {
+        xhr.responseType = LoaderResource4.XHR_RESPONSE_TYPE.TEXT;
       } else {
         xhr.responseType = this.xhrType;
       }
@@ -16143,7 +16143,7 @@
       xhr.addEventListener("load", this._boundXhrOnLoad, false);
       xhr.send();
     };
-    LoaderResource2.prototype._loadXdr = function() {
+    LoaderResource4.prototype._loadXdr = function() {
       if (typeof this.xhrType !== "string") {
         this.xhrType = this._determineXhrType();
       }
@@ -16158,7 +16158,7 @@
         return xdr.send();
       }, 1);
     };
-    LoaderResource2.prototype._createSource = function(type, url2, mime) {
+    LoaderResource4.prototype._createSource = function(type, url2, mime) {
       if (!mime) {
         mime = type + "/" + this._getExtension(url2);
       }
@@ -16167,55 +16167,55 @@
       source.type = mime;
       return source;
     };
-    LoaderResource2.prototype._onError = function(event) {
+    LoaderResource4.prototype._onError = function(event) {
       this.abort("Failed to load element using: " + event.target.nodeName);
     };
-    LoaderResource2.prototype._onProgress = function(event) {
+    LoaderResource4.prototype._onProgress = function(event) {
       if (event && event.lengthComputable) {
         this.onProgress.dispatch(this, event.loaded / event.total);
       }
     };
-    LoaderResource2.prototype._onTimeout = function() {
+    LoaderResource4.prototype._onTimeout = function() {
       this.abort("Load timed out.");
     };
-    LoaderResource2.prototype._xhrOnError = function() {
+    LoaderResource4.prototype._xhrOnError = function() {
       var xhr = this.xhr;
       this.abort(reqType(xhr) + " Request failed. Status: " + xhr.status + ', text: "' + xhr.statusText + '"');
     };
-    LoaderResource2.prototype._xhrOnTimeout = function() {
+    LoaderResource4.prototype._xhrOnTimeout = function() {
       var xhr = this.xhr;
       this.abort(reqType(xhr) + " Request timed out.");
     };
-    LoaderResource2.prototype._xhrOnAbort = function() {
+    LoaderResource4.prototype._xhrOnAbort = function() {
       var xhr = this.xhr;
       this.abort(reqType(xhr) + " Request was aborted by the user.");
     };
-    LoaderResource2.prototype._xhrOnLoad = function() {
+    LoaderResource4.prototype._xhrOnLoad = function() {
       var xhr = this.xhr;
       var text = "";
       var status = typeof xhr.status === "undefined" ? STATUS_OK : xhr.status;
       if (xhr.responseType === "" || xhr.responseType === "text" || typeof xhr.responseType === "undefined") {
         text = xhr.responseText;
       }
-      if (status === STATUS_NONE && (text.length > 0 || xhr.responseType === LoaderResource2.XHR_RESPONSE_TYPE.BUFFER)) {
+      if (status === STATUS_NONE && (text.length > 0 || xhr.responseType === LoaderResource4.XHR_RESPONSE_TYPE.BUFFER)) {
         status = STATUS_OK;
       } else if (status === STATUS_IE_BUG_EMPTY) {
         status = STATUS_EMPTY;
       }
       var statusType = status / 100 | 0;
       if (statusType === STATUS_TYPE_OK) {
-        if (this.xhrType === LoaderResource2.XHR_RESPONSE_TYPE.TEXT) {
+        if (this.xhrType === LoaderResource4.XHR_RESPONSE_TYPE.TEXT) {
           this.data = text;
-          this.type = LoaderResource2.TYPE.TEXT;
-        } else if (this.xhrType === LoaderResource2.XHR_RESPONSE_TYPE.JSON) {
+          this.type = LoaderResource4.TYPE.TEXT;
+        } else if (this.xhrType === LoaderResource4.XHR_RESPONSE_TYPE.JSON) {
           try {
             this.data = JSON.parse(text);
-            this.type = LoaderResource2.TYPE.JSON;
+            this.type = LoaderResource4.TYPE.JSON;
           } catch (e) {
             this.abort("Error trying to parse loaded json: " + e);
             return;
           }
-        } else if (this.xhrType === LoaderResource2.XHR_RESPONSE_TYPE.DOCUMENT) {
+        } else if (this.xhrType === LoaderResource4.XHR_RESPONSE_TYPE.DOCUMENT) {
           try {
             if (globalThis.DOMParser) {
               var domparser = new DOMParser();
@@ -16225,7 +16225,7 @@
               div.innerHTML = text;
               this.data = div;
             }
-            this.type = LoaderResource2.TYPE.XML;
+            this.type = LoaderResource4.TYPE.XML;
           } catch (e$1) {
             this.abort("Error trying to parse loaded xml: " + e$1);
             return;
@@ -16239,7 +16239,7 @@
       }
       this.complete();
     };
-    LoaderResource2.prototype._determineCrossOrigin = function(url2, loc) {
+    LoaderResource4.prototype._determineCrossOrigin = function(url2, loc) {
       if (url2.indexOf("data:") === 0) {
         return "";
       }
@@ -16259,13 +16259,13 @@
       }
       return "";
     };
-    LoaderResource2.prototype._determineXhrType = function() {
-      return LoaderResource2._xhrTypeMap[this.extension] || LoaderResource2.XHR_RESPONSE_TYPE.TEXT;
+    LoaderResource4.prototype._determineXhrType = function() {
+      return LoaderResource4._xhrTypeMap[this.extension] || LoaderResource4.XHR_RESPONSE_TYPE.TEXT;
     };
-    LoaderResource2.prototype._determineLoadType = function() {
-      return LoaderResource2._loadTypeMap[this.extension] || LoaderResource2.LOAD_TYPE.XHR;
+    LoaderResource4.prototype._determineLoadType = function() {
+      return LoaderResource4._loadTypeMap[this.extension] || LoaderResource4.LOAD_TYPE.XHR;
     };
-    LoaderResource2.prototype._getExtension = function(url2) {
+    LoaderResource4.prototype._getExtension = function(url2) {
       if (url2 === void 0) {
         url2 = this.url;
       }
@@ -16282,31 +16282,31 @@
       }
       return ext.toLowerCase();
     };
-    LoaderResource2.prototype._getMimeFromXhrType = function(type) {
+    LoaderResource4.prototype._getMimeFromXhrType = function(type) {
       switch (type) {
-        case LoaderResource2.XHR_RESPONSE_TYPE.BUFFER:
+        case LoaderResource4.XHR_RESPONSE_TYPE.BUFFER:
           return "application/octet-binary";
-        case LoaderResource2.XHR_RESPONSE_TYPE.BLOB:
+        case LoaderResource4.XHR_RESPONSE_TYPE.BLOB:
           return "application/blob";
-        case LoaderResource2.XHR_RESPONSE_TYPE.DOCUMENT:
+        case LoaderResource4.XHR_RESPONSE_TYPE.DOCUMENT:
           return "application/xml";
-        case LoaderResource2.XHR_RESPONSE_TYPE.JSON:
+        case LoaderResource4.XHR_RESPONSE_TYPE.JSON:
           return "application/json";
-        case LoaderResource2.XHR_RESPONSE_TYPE.DEFAULT:
-        case LoaderResource2.XHR_RESPONSE_TYPE.TEXT:
+        case LoaderResource4.XHR_RESPONSE_TYPE.DEFAULT:
+        case LoaderResource4.XHR_RESPONSE_TYPE.TEXT:
         default:
           return "text/plain";
       }
     };
-    return LoaderResource2;
+    return LoaderResource4;
   }();
-  (function(LoaderResource2) {
+  (function(LoaderResource4) {
     (function(STATUS_FLAGS) {
       STATUS_FLAGS[STATUS_FLAGS["NONE"] = 0] = "NONE";
       STATUS_FLAGS[STATUS_FLAGS["DATA_URL"] = 1] = "DATA_URL";
       STATUS_FLAGS[STATUS_FLAGS["COMPLETE"] = 2] = "COMPLETE";
       STATUS_FLAGS[STATUS_FLAGS["LOADING"] = 4] = "LOADING";
-    })(LoaderResource2.STATUS_FLAGS || (LoaderResource2.STATUS_FLAGS = {}));
+    })(LoaderResource4.STATUS_FLAGS || (LoaderResource4.STATUS_FLAGS = {}));
     (function(TYPE) {
       TYPE[TYPE["UNKNOWN"] = 0] = "UNKNOWN";
       TYPE[TYPE["JSON"] = 1] = "JSON";
@@ -16315,13 +16315,13 @@
       TYPE[TYPE["AUDIO"] = 4] = "AUDIO";
       TYPE[TYPE["VIDEO"] = 5] = "VIDEO";
       TYPE[TYPE["TEXT"] = 6] = "TEXT";
-    })(LoaderResource2.TYPE || (LoaderResource2.TYPE = {}));
+    })(LoaderResource4.TYPE || (LoaderResource4.TYPE = {}));
     (function(LOAD_TYPE) {
       LOAD_TYPE[LOAD_TYPE["XHR"] = 1] = "XHR";
       LOAD_TYPE[LOAD_TYPE["IMAGE"] = 2] = "IMAGE";
       LOAD_TYPE[LOAD_TYPE["AUDIO"] = 3] = "AUDIO";
       LOAD_TYPE[LOAD_TYPE["VIDEO"] = 4] = "VIDEO";
-    })(LoaderResource2.LOAD_TYPE || (LoaderResource2.LOAD_TYPE = {}));
+    })(LoaderResource4.LOAD_TYPE || (LoaderResource4.LOAD_TYPE = {}));
     (function(XHR_RESPONSE_TYPE) {
       XHR_RESPONSE_TYPE["DEFAULT"] = "text";
       XHR_RESPONSE_TYPE["BUFFER"] = "arraybuffer";
@@ -16329,49 +16329,49 @@
       XHR_RESPONSE_TYPE["DOCUMENT"] = "document";
       XHR_RESPONSE_TYPE["JSON"] = "json";
       XHR_RESPONSE_TYPE["TEXT"] = "text";
-    })(LoaderResource2.XHR_RESPONSE_TYPE || (LoaderResource2.XHR_RESPONSE_TYPE = {}));
-    LoaderResource2._loadTypeMap = {
-      gif: LoaderResource2.LOAD_TYPE.IMAGE,
-      png: LoaderResource2.LOAD_TYPE.IMAGE,
-      bmp: LoaderResource2.LOAD_TYPE.IMAGE,
-      jpg: LoaderResource2.LOAD_TYPE.IMAGE,
-      jpeg: LoaderResource2.LOAD_TYPE.IMAGE,
-      tif: LoaderResource2.LOAD_TYPE.IMAGE,
-      tiff: LoaderResource2.LOAD_TYPE.IMAGE,
-      webp: LoaderResource2.LOAD_TYPE.IMAGE,
-      tga: LoaderResource2.LOAD_TYPE.IMAGE,
-      svg: LoaderResource2.LOAD_TYPE.IMAGE,
-      "svg+xml": LoaderResource2.LOAD_TYPE.IMAGE,
-      mp3: LoaderResource2.LOAD_TYPE.AUDIO,
-      ogg: LoaderResource2.LOAD_TYPE.AUDIO,
-      wav: LoaderResource2.LOAD_TYPE.AUDIO,
-      mp4: LoaderResource2.LOAD_TYPE.VIDEO,
-      webm: LoaderResource2.LOAD_TYPE.VIDEO
+    })(LoaderResource4.XHR_RESPONSE_TYPE || (LoaderResource4.XHR_RESPONSE_TYPE = {}));
+    LoaderResource4._loadTypeMap = {
+      gif: LoaderResource4.LOAD_TYPE.IMAGE,
+      png: LoaderResource4.LOAD_TYPE.IMAGE,
+      bmp: LoaderResource4.LOAD_TYPE.IMAGE,
+      jpg: LoaderResource4.LOAD_TYPE.IMAGE,
+      jpeg: LoaderResource4.LOAD_TYPE.IMAGE,
+      tif: LoaderResource4.LOAD_TYPE.IMAGE,
+      tiff: LoaderResource4.LOAD_TYPE.IMAGE,
+      webp: LoaderResource4.LOAD_TYPE.IMAGE,
+      tga: LoaderResource4.LOAD_TYPE.IMAGE,
+      svg: LoaderResource4.LOAD_TYPE.IMAGE,
+      "svg+xml": LoaderResource4.LOAD_TYPE.IMAGE,
+      mp3: LoaderResource4.LOAD_TYPE.AUDIO,
+      ogg: LoaderResource4.LOAD_TYPE.AUDIO,
+      wav: LoaderResource4.LOAD_TYPE.AUDIO,
+      mp4: LoaderResource4.LOAD_TYPE.VIDEO,
+      webm: LoaderResource4.LOAD_TYPE.VIDEO
     };
-    LoaderResource2._xhrTypeMap = {
-      xhtml: LoaderResource2.XHR_RESPONSE_TYPE.DOCUMENT,
-      html: LoaderResource2.XHR_RESPONSE_TYPE.DOCUMENT,
-      htm: LoaderResource2.XHR_RESPONSE_TYPE.DOCUMENT,
-      xml: LoaderResource2.XHR_RESPONSE_TYPE.DOCUMENT,
-      tmx: LoaderResource2.XHR_RESPONSE_TYPE.DOCUMENT,
-      svg: LoaderResource2.XHR_RESPONSE_TYPE.DOCUMENT,
-      tsx: LoaderResource2.XHR_RESPONSE_TYPE.DOCUMENT,
-      gif: LoaderResource2.XHR_RESPONSE_TYPE.BLOB,
-      png: LoaderResource2.XHR_RESPONSE_TYPE.BLOB,
-      bmp: LoaderResource2.XHR_RESPONSE_TYPE.BLOB,
-      jpg: LoaderResource2.XHR_RESPONSE_TYPE.BLOB,
-      jpeg: LoaderResource2.XHR_RESPONSE_TYPE.BLOB,
-      tif: LoaderResource2.XHR_RESPONSE_TYPE.BLOB,
-      tiff: LoaderResource2.XHR_RESPONSE_TYPE.BLOB,
-      webp: LoaderResource2.XHR_RESPONSE_TYPE.BLOB,
-      tga: LoaderResource2.XHR_RESPONSE_TYPE.BLOB,
-      json: LoaderResource2.XHR_RESPONSE_TYPE.JSON,
-      text: LoaderResource2.XHR_RESPONSE_TYPE.TEXT,
-      txt: LoaderResource2.XHR_RESPONSE_TYPE.TEXT,
-      ttf: LoaderResource2.XHR_RESPONSE_TYPE.BUFFER,
-      otf: LoaderResource2.XHR_RESPONSE_TYPE.BUFFER
+    LoaderResource4._xhrTypeMap = {
+      xhtml: LoaderResource4.XHR_RESPONSE_TYPE.DOCUMENT,
+      html: LoaderResource4.XHR_RESPONSE_TYPE.DOCUMENT,
+      htm: LoaderResource4.XHR_RESPONSE_TYPE.DOCUMENT,
+      xml: LoaderResource4.XHR_RESPONSE_TYPE.DOCUMENT,
+      tmx: LoaderResource4.XHR_RESPONSE_TYPE.DOCUMENT,
+      svg: LoaderResource4.XHR_RESPONSE_TYPE.DOCUMENT,
+      tsx: LoaderResource4.XHR_RESPONSE_TYPE.DOCUMENT,
+      gif: LoaderResource4.XHR_RESPONSE_TYPE.BLOB,
+      png: LoaderResource4.XHR_RESPONSE_TYPE.BLOB,
+      bmp: LoaderResource4.XHR_RESPONSE_TYPE.BLOB,
+      jpg: LoaderResource4.XHR_RESPONSE_TYPE.BLOB,
+      jpeg: LoaderResource4.XHR_RESPONSE_TYPE.BLOB,
+      tif: LoaderResource4.XHR_RESPONSE_TYPE.BLOB,
+      tiff: LoaderResource4.XHR_RESPONSE_TYPE.BLOB,
+      webp: LoaderResource4.XHR_RESPONSE_TYPE.BLOB,
+      tga: LoaderResource4.XHR_RESPONSE_TYPE.BLOB,
+      json: LoaderResource4.XHR_RESPONSE_TYPE.JSON,
+      text: LoaderResource4.XHR_RESPONSE_TYPE.TEXT,
+      txt: LoaderResource4.XHR_RESPONSE_TYPE.TEXT,
+      ttf: LoaderResource4.XHR_RESPONSE_TYPE.BUFFER,
+      otf: LoaderResource4.XHR_RESPONSE_TYPE.BUFFER
     };
-    LoaderResource2.EMPTY_GIF = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
+    LoaderResource4.EMPTY_GIF = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
   })(LoaderResource || (LoaderResource = {}));
   function _noop() {
   }
@@ -17196,7 +17196,7 @@
     }
     CompressedTextureLoader2.use = function(resource, next) {
       var data = resource.data;
-      var loader = this;
+      var loader2 = this;
       if (resource.type === LoaderResource.TYPE.JSON && data && data.cacheID && data.textures) {
         var textures = data.textures;
         var textureURL = void 0;
@@ -17227,9 +17227,9 @@
           metadata: resource.metadata.imageMetadata,
           parentResource: resource
         };
-        var resourcePath = url.resolve(resource.url.replace(loader.baseUrl, ""), textureURL);
+        var resourcePath = url.resolve(resource.url.replace(loader2.baseUrl, ""), textureURL);
         var resourceName = data.cacheID;
-        loader.add(resourceName, resourcePath, loadOptions, function(res) {
+        loader2.add(resourceName, resourcePath, loadOptions, function(res) {
           if (res.error) {
             next(res.error);
             return;
@@ -22193,9 +22193,9 @@
     }
     SpritesheetLoader2.use = function(resource, next) {
       var _a3, _b2;
-      var loader = this;
+      var loader2 = this;
       var imageResourceName = resource.name + "_image";
-      if (!resource.data || resource.type !== LoaderResource.TYPE.JSON || !resource.data.frames || loader.resources[imageResourceName]) {
+      if (!resource.data || resource.type !== LoaderResource.TYPE.JSON || !resource.data.frames || loader2.resources[imageResourceName]) {
         next();
         return;
       }
@@ -22206,8 +22206,8 @@
             return "continue";
           }
           var itemName = item2.replace(".json", "");
-          var itemUrl = url.resolve(resource.url.replace(loader.baseUrl, ""), item2);
-          if (loader.resources[itemName] || Object.values(loader.resources).some(function(r) {
+          var itemUrl = url.resolve(resource.url.replace(loader2.baseUrl, ""), item2);
+          if (loader2.resources[itemName] || Object.values(loader2.resources).some(function(r) {
             return url.format(url.parse(r.url)) === itemUrl;
           })) {
             return "continue";
@@ -22219,7 +22219,7 @@
             parentResource: resource,
             metadata: resource.metadata
           };
-          loader.add(itemName, itemUrl, options);
+          loader2.add(itemName, itemUrl, options);
         };
         for (var _i = 0, multiPacks_1 = multiPacks; _i < multiPacks_1.length; _i++) {
           var item = multiPacks_1[_i];
@@ -22231,8 +22231,8 @@
         metadata: resource.metadata.imageMetadata,
         parentResource: resource
       };
-      var resourcePath = SpritesheetLoader2.getResourcePath(resource, loader.baseUrl);
-      loader.add(imageResourceName, resourcePath, loadOptions, function onImageLoad(res) {
+      var resourcePath = SpritesheetLoader2.getResourcePath(resource, loader2.baseUrl);
+      loader2.add(imageResourceName, resourcePath, loadOptions, function onImageLoad(res) {
         if (res.error) {
           next(res.error);
           return;
@@ -23981,19 +23981,19 @@
         }
       }
     };
-    BitmapFontLoader2.getBaseUrl = function(loader, resource) {
+    BitmapFontLoader2.getBaseUrl = function(loader2, resource) {
       var resUrl = !resource.isDataUrl ? BitmapFontLoader2.dirname(resource.url) : "";
       if (resource.isDataUrl) {
         if (resUrl === ".") {
           resUrl = "";
         }
-        if (loader.baseUrl && resUrl) {
-          if (loader.baseUrl.charAt(loader.baseUrl.length - 1) === "/") {
+        if (loader2.baseUrl && resUrl) {
+          if (loader2.baseUrl.charAt(loader2.baseUrl.length - 1) === "/") {
             resUrl += "/";
           }
         }
       }
-      resUrl = resUrl.replace(loader.baseUrl, "");
+      resUrl = resUrl.replace(loader2.baseUrl, "");
       if (resUrl && resUrl.charAt(resUrl.length - 1) !== "/") {
         resUrl += "/";
       }
@@ -28037,10 +28037,10 @@ void main() {
   // ts/constants.ts
   var VIEW_W = 800;
   var VIEW_H = 600;
-  var INITIAL_TURNS = 75;
+  var INITIAL_TURNS = 50;
   var COLOR_YELLOW = "#fcf100";
   var COLOR_WHITE = "#ffffff";
-  var COLOR_BG = "00ccff";
+  var COLOR_BG = "#00ccff";
   var COLOR_BUTTON_GRADIENT_TOP = "#fff600";
   var COLOR_BUTTON_GRADIENT_BOTTOM = "#d1ab00";
   var COLOR_BUTTON_TEXT = "#736200";
@@ -28050,6 +28050,7 @@ void main() {
   var COLOR_SUCCESS_GRADIENT_TOP = "#38ff38";
   var COLOR_SUCCESS_GRADIENT_BOTTOM = "#139a13";
   var COLOR_SUCCESS_TEXT = "#073807";
+  var COLOR_TEXT = "#09596d";
   var COLOR_TEXT_TURN_SCORE = COLOR_WHITE;
   var COLOR_TITLE = COLOR_YELLOW;
   var SHADOW_Y = 6;
@@ -28059,8 +28060,9 @@ void main() {
   var TILE_H_FULL = TILE_H + SHADOW_Y + 3;
   var SLOT_W = TILE_W_FULL * 1.25;
   var SLOT_H = TILE_H_FULL + TILE_W_FULL * 0.25;
-  var TILE_CLICK = "tile-click";
+  var HELP_CLICK = "help-click";
   var PLAY_CLICK = "play-click";
+  var TILE_CLICK = "tile-click";
 
   // ts/Text.ts
   var Text2 = class extends Text {
@@ -28071,7 +28073,7 @@ void main() {
         fontFamily: "Ships Whistle",
         fontSize: 32,
         align: "center",
-        fill: "#09596D"
+        fill: COLOR_TEXT
       };
       this.style = Object.assign({}, defaultStyle2, initialStyle || {});
     }
@@ -28142,15 +28144,15 @@ void main() {
       this.corner = 12;
       this.fontSize = 32;
       this.label = "";
-      this.paddingX = 0;
-      this.paddingY = 0;
+      this.paddingX = 60;
+      this.paddingY = 20;
       this.shadow = null;
       this.text = null;
       this.textStyle = {};
       this.label = options.label;
       this.fontSize = options.fontSize || this.fontSize;
-      this.paddingX = options.paddingX;
-      this.paddingY = options.paddingY;
+      this.paddingX = options.paddingX ?? this.paddingX;
+      this.paddingY = options.paddingY ?? this.paddingY;
       this.x = options.x || 0;
       this.y = options.y || 0;
       this.corner = options.corner || this.corner;
@@ -28392,7 +28394,7 @@ void main() {
 
   // ts/Game.ts
   var Game = class {
-    constructor(ticker) {
+    constructor(ticker, resources2) {
       this.animationGameEnter = null;
       this.app = null;
       this.bank = null;
@@ -28402,9 +28404,12 @@ void main() {
       this.gameElements = null;
       this.getNextLetter = letterGenerator();
       this.h = VIEW_H;
+      this.helpButton = null;
+      this.helpSlide = new Container();
       this.lastTime = 0;
       this.playButton = null;
       this.preventClicksPromises = [];
+      this.resources = null;
       this.score = 0;
       this.ticker = null;
       this.tileEntryPoint = { x: 0, y: 0 };
@@ -28425,10 +28430,13 @@ void main() {
         backgroundColor: utils_exports.string2hex(COLOR_BG)
       });
       this.ticker = ticker;
+      this.resources = resources2;
       document.querySelector("#app")?.append(this.app.view);
       this.initTitle();
       this.initPlayButton();
+      this.initHelpButton();
       this.initGameElements();
+      this.listenForHelpClick();
       this.listenForPlayClick();
       this.listenForTileClick();
       this.ticker.add(this.update.bind(this));
@@ -28448,6 +28456,46 @@ void main() {
         }
       }
       this.combo = 0;
+    }
+    drawHelpScreen(screen = 1) {
+      const key = screen === 1 ? "help_1" : "help_2";
+      const helpImg = new Sprite(this.resources[key].texture);
+      helpImg.width = VIEW_W;
+      helpImg.height = VIEW_H;
+      helpImg.buttonMode = true;
+      helpImg.interactive = true;
+      this.helpSlide.addChild(helpImg);
+      helpImg.addListener("click", () => {
+        this.helpSlide.removeChild(helpImg);
+        if (screen === 1) {
+          this.drawHelpScreen(2);
+          return;
+        }
+        anime_es_default({
+          targets: {
+            alpha: 0,
+            y: this.text.title.y
+          },
+          alpha: {
+            value: 1,
+            duration: 150,
+            easing: "linear"
+          },
+          y: "+=50",
+          duration: 500,
+          easing: "easeInOutSine",
+          update: (anim) => {
+            const obj = anim.animatables[0].target;
+            this.playButton.alpha = obj.alpha;
+            this.helpButton.alpha = obj.alpha;
+            this.text.title.y = obj.y;
+          },
+          complete: (anim) => {
+            this.playButton.setClickable(true);
+            this.helpButton.setClickable(true);
+          }
+        });
+      });
     }
     async endGame() {
       const done = this.preventClicksRequest();
@@ -28479,9 +28527,11 @@ void main() {
           const obj = anim.animatables[0].target;
           this.text.finalScore.alpha = obj.alpha;
           this.playButton.alpha = obj.alpha;
+          this.helpButton.alpha = obj.alpha;
         },
         complete: () => {
           this.playButton.setClickable(true);
+          this.helpButton.setClickable(true);
           done();
         }
       });
@@ -28560,11 +28610,19 @@ void main() {
       this.gameElements.height = this.app.view.height;
       this.addChild(this.gameElements);
     }
+    initHelpButton() {
+      this.helpButton = new Button({
+        label: "How to play",
+        clickEventName: HELP_CLICK
+      });
+      this.helpButton.x = VIEW_W / 2 - this.helpButton.width / 2;
+      this.helpButton.y = VIEW_H / 2 + this.helpButton.height;
+      this.addChild(this.helpButton);
+      this.addChild(this.helpSlide);
+    }
     initPlayButton() {
       this.playButton = new Button({
         label: "Play",
-        paddingX: 60,
-        paddingY: 20,
         clickEventName: PLAY_CLICK
       });
       this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
@@ -28622,10 +28680,10 @@ void main() {
       this.text.title.y = 100;
       this.addChild(this.text.title);
     }
-    listenForPlayClick() {
-      import_pubsub_js2.default.subscribe(PLAY_CLICK, () => {
+    listenForHelpClick() {
+      import_pubsub_js2.default.subscribe(HELP_CLICK, () => {
         this.playButton.setClickable(false);
-        this.initGame(true);
+        this.helpButton.setClickable(false);
         anime_es_default({
           targets: {
             alpha: 1,
@@ -28633,7 +28691,8 @@ void main() {
           },
           alpha: {
             value: 0,
-            duration: 150
+            duration: 150,
+            easing: "linear"
           },
           y: 50,
           duration: 500,
@@ -28642,6 +28701,40 @@ void main() {
             const obj = anim.animatables[0].target;
             this.text.title.y = obj.y;
             this.playButton.alpha = obj.alpha;
+            this.helpButton.alpha = obj.alpha;
+            if (this.text.finalScore) {
+              this.text.finalScore.alpha = obj.alpha;
+            }
+          },
+          complete: () => {
+            this.drawHelpScreen();
+          }
+        });
+      });
+    }
+    listenForPlayClick() {
+      import_pubsub_js2.default.subscribe(PLAY_CLICK, () => {
+        this.playButton.setClickable(false);
+        this.helpButton.setClickable(false);
+        this.initGame(true);
+        anime_es_default({
+          targets: {
+            alpha: 1,
+            y: this.text.title.y
+          },
+          alpha: {
+            value: 0,
+            duration: 150,
+            easing: "linear"
+          },
+          y: 50,
+          duration: 500,
+          easing: "easeInOutSine",
+          update: (anim) => {
+            const obj = anim.animatables[0].target;
+            this.text.title.y = obj.y;
+            this.playButton.alpha = obj.alpha;
+            this.helpButton.alpha = obj.alpha;
             if (this.text.finalScore) {
               this.text.finalScore.alpha = obj.alpha;
             }
@@ -28773,12 +28866,18 @@ void main() {
     document.fonts.add(font);
   });
   var wordListPromise = getWordList();
-  Promise.all([fontFacePromise, wordListPromise]).then(() => main());
-  function main() {
+  var loader = Loader.shared;
+  loader.add("help_1", "images/help_1.png");
+  loader.add("help_2", "images/help_2.png");
+  loader.load(async (loader2, resources2) => {
+    await Promise.all([fontFacePromise, wordListPromise]);
+    main(resources2);
+  });
+  function main(resources2) {
     const ticker = Ticker.shared;
     ticker.autoStart = false;
     ticker.stop();
-    const game = new Game(ticker);
+    new Game(ticker, resources2);
   }
   async function getWordList() {
     if (localStorage.getItem("chain-wordlist")) {

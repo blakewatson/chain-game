@@ -1,4 +1,5 @@
-import { Ticker } from 'pixi.js';
+import { Dict } from '@pixi/utils';
+import { Loader, LoaderResource, Ticker } from 'pixi.js';
 import Game from './Game';
 
 const fontFace = new FontFace(
@@ -14,13 +15,21 @@ fontFacePromise.then((font) => {
 
 const wordListPromise = getWordList();
 
-Promise.all([fontFacePromise, wordListPromise]).then(() => main());
+const loader = Loader.shared;
 
-function main() {
+loader.add('help_1', 'images/help_1.png');
+loader.add('help_2', 'images/help_2.png');
+
+loader.load(async (loader, resources) => {
+  await Promise.all([fontFacePromise, wordListPromise]);
+  main(resources);
+});
+
+function main(resources: Dict<LoaderResource>) {
   const ticker = Ticker.shared;
   ticker.autoStart = false;
   ticker.stop();
-  const game = new Game(ticker);
+  new Game(ticker, resources);
 }
 
 async function getWordList() {

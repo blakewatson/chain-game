@@ -4,11 +4,20 @@
   font-weight: bold;
 } */
 
+html {
+  background-color: #00ccff;
+}
+
 #app {
   margin: 0 auto;
   margin-top: 100px;
+  border: 1px solid transparent;
+  border-radius: 8px;
   width: 800px;
   height: 600px;
+  box-shadow: 10px 10px 16px 0 rgba(0, 0, 0, 0.15),
+    -10px -10px 16px 0 rgba(255, 255, 255, 0.15);
+  overflow: hidden;
 }
 
 #app > * {

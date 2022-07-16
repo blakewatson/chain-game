@@ -33,8 +33,8 @@ export default class Button extends Container {
   public corner = 12;
   public fontSize = 32;
   public label: string = '';
-  public paddingX: number = 0;
-  public paddingY: number = 0;
+  public paddingX: number = 60;
+  public paddingY: number = 20;
   public shadow: Graphics | null = null;
   public text: Text | null = null;
   public textStyle: Partial<TextStyle> = {};
@@ -44,8 +44,8 @@ export default class Button extends Container {
 
     this.label = options.label;
     this.fontSize = options.fontSize || this.fontSize;
-    this.paddingX = options.paddingX;
-    this.paddingY = options.paddingY;
+    this.paddingX = options.paddingX ?? this.paddingX;
+    this.paddingY = options.paddingY ?? this.paddingY;
     this.x = options.x || 0;
     this.y = options.y || 0;
     this.corner = options.corner || this.corner;

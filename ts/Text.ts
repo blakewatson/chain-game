@@ -1,5 +1,6 @@
 import anime, { AnimeParams } from 'animejs';
 import { Text as PixiText, TextStyle } from 'pixi.js';
+import { COLOR_TEXT } from './constants';
 
 export default class Text extends PixiText {
   public initialStyle: Partial<TextStyle> = null;
@@ -11,7 +12,7 @@ export default class Text extends PixiText {
       fontFamily: 'Ships Whistle',
       fontSize: 32,
       align: 'center',
-      fill: '#09596D'
+      fill: COLOR_TEXT
     };
 
     this.style = Object.assign({}, defaultStyle, initialStyle || {});
