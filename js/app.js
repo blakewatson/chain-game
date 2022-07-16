@@ -28037,7 +28037,7 @@ void main() {
   // ts/constants.ts
   var VIEW_W = 800;
   var VIEW_H = 600;
-  var INITIAL_TURNS = 10;
+  var INITIAL_TURNS = 50;
   var COLOR_YELLOW = "#fcf100";
   var COLOR_WHITE = "#ffffff";
   var COLOR_BG = "#00ccff";
