@@ -36,4 +36,5 @@ export const SLOT_H = TILE_H_FULL + TILE_W_FULL * 0.25;
 // Events
 export const HELP_CLICK = 'help-click';
 export const PLAY_CLICK = 'play-click';
+export const STATS_CLICK = 'stats-click';
 export const TILE_CLICK = 'tile-click';

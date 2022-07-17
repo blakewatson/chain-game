@@ -6,6 +6,7 @@ import {
   COLOR_WHITE,
   HELP_CLICK,
   PLAY_CLICK,
+  STATS_CLICK,
   VIEW_H,
   VIEW_W
 } from './constants';
@@ -18,6 +19,7 @@ export default class SceneMenu extends Container {
   public game: Game | null = null;
   public helpButton: Button | null = null;
   public playButton: Button | null = null;
+  public statsButton: Button | null = null;
 
   public constructor() {
     super();
@@ -32,6 +34,7 @@ export default class SceneMenu extends Container {
     anim.finished.then(() => {
       this.playButton.setClickable(true);
       this.helpButton.setClickable(true);
+      this.statsButton.setClickable(true);
     });
 
     return anim;
@@ -40,6 +43,7 @@ export default class SceneMenu extends Container {
   public fadeOut(autoplay = true) {
     this.playButton.setClickable(false);
     this.helpButton.setClickable(false);
+    this.statsButton.setClickable(false);
 
     return anime({
       targets: {
@@ -65,10 +69,12 @@ export default class SceneMenu extends Container {
 
     this.initPlayButton();
     this.initHelpButton();
+    this.initStatsButton();
     this.initCredits();
 
     this.listenForHelpClick();
     this.listenForPlayClick();
+    this.listenForStatsClick();
   }
 
   public initCredits() {
@@ -94,7 +100,7 @@ export default class SceneMenu extends Container {
     this.finalScore = new Text(`Final Score: ${score}`);
     this.finalScore.anchor.set(0.5);
     this.finalScore.x = VIEW_W / 2;
-    this.finalScore.y = VIEW_H / 2 - 90;
+    this.finalScore.y = VIEW_H / 2 - 110;
     this.addChild(this.finalScore);
   }
 
@@ -105,7 +111,7 @@ export default class SceneMenu extends Container {
     });
 
     this.helpButton.x = VIEW_W / 2 - this.helpButton.width / 2;
-    this.helpButton.y = VIEW_H / 2 + this.helpButton.height;
+    this.helpButton.y = VIEW_H / 2 + this.helpButton.height / 2;
 
     this.addChild(this.helpButton);
   }
@@ -117,15 +123,28 @@ export default class SceneMenu extends Container {
     });
 
     this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
-    this.playButton.y = VIEW_H / 2 - this.playButton.height / 2;
+    this.playButton.y = VIEW_H / 2 - this.playButton.height;
 
     this.addChild(this.playButton);
+  }
+
+  public initStatsButton() {
+    this.statsButton = new Button({
+      label: 'Stats',
+      clickEventName: STATS_CLICK
+    });
+
+    this.statsButton.x = VIEW_W / 2 - this.statsButton.width / 2;
+    this.statsButton.y = VIEW_H / 2 + this.statsButton.height * 2;
+
+    this.addChild(this.statsButton);
   }
 
   public listenForHelpClick() {
     PubSub.subscribe(HELP_CLICK, () => {
       this.playButton.setClickable(false);
       this.helpButton.setClickable(false);
+      this.statsButton.setClickable(false);
 
       // fade out menu buttons and move title
       this.game.title.moveUp();
@@ -140,6 +159,7 @@ export default class SceneMenu extends Container {
     PubSub.subscribe(PLAY_CLICK, () => {
       this.playButton.setClickable(false);
       this.helpButton.setClickable(false);
+      this.statsButton.setClickable(false);
       this.game.initGame(true);
 
       this.game.title.moveUp();
@@ -147,6 +167,21 @@ export default class SceneMenu extends Container {
       this.fadeOut().finished.then(() => {
         this.playButton.updateLabel('Play Again');
         this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
+      });
+    });
+  }
+
+  public listenForStatsClick() {
+    PubSub.subscribe(STATS_CLICK, () => {
+      this.playButton.setClickable(false);
+      this.helpButton.setClickable(false);
+      this.statsButton.setClickable(false);
+
+      this.game.title.moveUp();
+
+      this.fadeOut().finished.then(() => {
+        // show stats
+        this.game.sceneStats.showStats();
       });
     });
   }

@@ -25,6 +25,7 @@ import {
   VIEW_W
 } from './constants';
 import SceneMenu from './SceneMenu';
+import SceneStats from './SceneStats';
 import {
   handleComboStreak,
   handleScore,
@@ -53,10 +54,10 @@ export default class Game {
   public getNextLetter = letterGenerator();
   public h: number = VIEW_H;
   public helpSlide: Container = new Container();
-  public lastTime: number = 0;
   public preventClicksPromises: Promise<any>[] = [];
   public resources: Dict<LoaderResource> | null = null;
   public sceneMenu: SceneMenu = new SceneMenu();
+  public sceneStats: SceneStats = new SceneStats();
   public score = 0;
   public ticker: Ticker | null = null;
   public tileEntryPoint: { x: number; y: number } = { x: 0, y: 0 };
@@ -91,6 +92,9 @@ export default class Game {
     this.addChild(this.sceneMenu);
 
     this.addChild(this.helpSlide);
+
+    this.sceneStats.init(this);
+    this.addChild(this.sceneStats);
 
     this.initGameElements();
 

@@ -28059,6 +28059,7 @@ void main() {
   var SLOT_H = TILE_H_FULL + TILE_W_FULL * 0.25;
   var HELP_CLICK = "help-click";
   var PLAY_CLICK = "play-click";
+  var STATS_CLICK = "stats-click";
   var TILE_CLICK = "tile-click";
 
   // ts/SceneMenu.ts
@@ -28274,6 +28275,7 @@ void main() {
       this.game = null;
       this.helpButton = null;
       this.playButton = null;
+      this.statsButton = null;
     }
     fadeIn() {
       const anim = this.fadeOut(false);
@@ -28283,12 +28285,14 @@ void main() {
       anim.finished.then(() => {
         this.playButton.setClickable(true);
         this.helpButton.setClickable(true);
+        this.statsButton.setClickable(true);
       });
       return anim;
     }
     fadeOut(autoplay = true) {
       this.playButton.setClickable(false);
       this.helpButton.setClickable(false);
+      this.statsButton.setClickable(false);
       return anime_es_default({
         targets: {
           alpha: 1
@@ -28309,9 +28313,11 @@ void main() {
       this.height = VIEW_H;
       this.initPlayButton();
       this.initHelpButton();
+      this.initStatsButton();
       this.initCredits();
       this.listenForHelpClick();
       this.listenForPlayClick();
+      this.listenForStatsClick();
     }
     initCredits() {
       this.credits = new Text2("created by Tim and Blake Watson", {
@@ -28333,7 +28339,7 @@ void main() {
       this.finalScore = new Text2(`Final Score: ${score}`);
       this.finalScore.anchor.set(0.5);
       this.finalScore.x = VIEW_W / 2;
-      this.finalScore.y = VIEW_H / 2 - 90;
+      this.finalScore.y = VIEW_H / 2 - 110;
       this.addChild(this.finalScore);
     }
     initHelpButton() {
@@ -28342,7 +28348,7 @@ void main() {
         clickEventName: HELP_CLICK
       });
       this.helpButton.x = VIEW_W / 2 - this.helpButton.width / 2;
-      this.helpButton.y = VIEW_H / 2 + this.helpButton.height;
+      this.helpButton.y = VIEW_H / 2 + this.helpButton.height / 2;
       this.addChild(this.helpButton);
     }
     initPlayButton() {
@@ -28351,13 +28357,23 @@ void main() {
         clickEventName: PLAY_CLICK
       });
       this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
-      this.playButton.y = VIEW_H / 2 - this.playButton.height / 2;
+      this.playButton.y = VIEW_H / 2 - this.playButton.height;
       this.addChild(this.playButton);
+    }
+    initStatsButton() {
+      this.statsButton = new Button({
+        label: "Stats",
+        clickEventName: STATS_CLICK
+      });
+      this.statsButton.x = VIEW_W / 2 - this.statsButton.width / 2;
+      this.statsButton.y = VIEW_H / 2 + this.statsButton.height * 2;
+      this.addChild(this.statsButton);
     }
     listenForHelpClick() {
       import_pubsub_js2.default.subscribe(HELP_CLICK, () => {
         this.playButton.setClickable(false);
         this.helpButton.setClickable(false);
+        this.statsButton.setClickable(false);
         this.game.title.moveUp();
         this.fadeOut().finished.then(() => {
           this.game.drawHelpScreen();
@@ -28368,11 +28384,23 @@ void main() {
       import_pubsub_js2.default.subscribe(PLAY_CLICK, () => {
         this.playButton.setClickable(false);
         this.helpButton.setClickable(false);
+        this.statsButton.setClickable(false);
         this.game.initGame(true);
         this.game.title.moveUp();
         this.fadeOut().finished.then(() => {
           this.playButton.updateLabel("Play Again");
           this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
+        });
+      });
+    }
+    listenForStatsClick() {
+      import_pubsub_js2.default.subscribe(STATS_CLICK, () => {
+        this.playButton.setClickable(false);
+        this.helpButton.setClickable(false);
+        this.statsButton.setClickable(false);
+        this.game.title.moveUp();
+        this.fadeOut().finished.then(() => {
+          this.game.sceneStats.showStats();
         });
       });
     }
@@ -28423,6 +28451,99 @@ void main() {
   var handleTurnScore = (score) => {
     stats.highestTurnScore = Math.max(stats.highestTurnScore, score);
     saveStats();
+  };
+
+  // ts/SceneStats.ts
+  var statsDisplay = /* @__PURE__ */ new Map([
+    ["numberPlayed", "Games played"],
+    ["highScore", "High score"],
+    ["avgScore", "Average score"],
+    ["highestTurnScore", "Highest word score"],
+    ["highestComboStreak", "Longest combo streak"],
+    ["numberWords", "Words made"],
+    ["avgWordLength", "Average word length"]
+  ]);
+  var SceneStats = class extends Container {
+    constructor() {
+      super();
+      this.doneButton = null;
+      this.game = null;
+      this.stats = new Container();
+      this.width = VIEW_W;
+      this.height = VIEW_W;
+    }
+    init(game) {
+      this.game = game;
+      this.alpha = 0;
+      this.doneButton = new Button({
+        label: "Done"
+      });
+      this.doneButton.x = VIEW_W / 2 - this.doneButton.width / 2;
+      this.doneButton.y = VIEW_H - this.doneButton.height - 20;
+      this.doneButton.addListener("click", () => {
+        this.hideStats();
+      });
+      this.addChild(this.stats);
+      this.addChild(this.doneButton);
+    }
+    fadeIn() {
+      const anim = this.fadeOut(false);
+      anim.reverse();
+      anim.seek(150);
+      anim.play();
+      return anim;
+    }
+    fadeOut(autoplay = true) {
+      return anime_es_default({
+        targets: {
+          alpha: 1
+        },
+        alpha: 0,
+        duration: 150,
+        easing: "linear",
+        autoplay,
+        update: (anim) => {
+          const obj = anim.animatables[0].target;
+          this.alpha = obj.alpha;
+        }
+      });
+    }
+    hideStats() {
+      this.doneButton.interactive = false;
+      this.doneButton.buttonMode = false;
+      this.fadeOut().finished.then(() => {
+        this.stats.removeChildren();
+        this.game.sceneMenu.fadeIn();
+        if (!this.game.sceneMenu.finalScore) {
+          this.game.title.moveDown();
+        }
+      });
+    }
+    showStats() {
+      Array.from(statsDisplay.entries()).forEach(([key, label], i) => {
+        const name = new Text2(label, {
+          align: "left"
+        });
+        name.x = 100;
+        name.y = 175 + i * name.height * 1.45;
+        let stat = stats[key];
+        if (key === "avgScore" || key === "avgWordLength") {
+          stat = stat.toFixed(2);
+        }
+        const value = new Text2(`${stat}`, {
+          align: "right"
+        });
+        value.x = VIEW_W - 100;
+        value.y = 175 + i * value.height * 1.45;
+        value.anchor.set(1, 0);
+        this.stats.addChild(name);
+        this.stats.addChild(value);
+      });
+      this.fadeIn().finished.then(() => {
+        this.doneButton.interactive = true;
+        this.doneButton.buttonMode = true;
+      });
+    }
   };
 
   // ts/Tile.ts
@@ -28621,10 +28742,10 @@ void main() {
       this.getNextLetter = letterGenerator();
       this.h = VIEW_H;
       this.helpSlide = new Container();
-      this.lastTime = 0;
       this.preventClicksPromises = [];
       this.resources = null;
       this.sceneMenu = new SceneMenu();
+      this.sceneStats = new SceneStats();
       this.score = 0;
       this.ticker = null;
       this.tileEntryPoint = { x: 0, y: 0 };
@@ -28651,6 +28772,8 @@ void main() {
       this.sceneMenu.init(this);
       this.addChild(this.sceneMenu);
       this.addChild(this.helpSlide);
+      this.sceneStats.init(this);
+      this.addChild(this.sceneStats);
       this.initGameElements();
       this.listenForTileClick();
       this.ticker.add(this.update.bind(this));
