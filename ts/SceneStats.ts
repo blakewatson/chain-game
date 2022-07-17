@@ -1,7 +1,7 @@
 import anime from 'animejs';
-import { Container } from 'pixi.js';
+import { Container, Graphics, utils } from 'pixi.js';
 import Button from './Button';
-import { VIEW_H, VIEW_W } from './constants';
+import { COLOR_TEXT, VIEW_H, VIEW_W } from './constants';
 import Game from './Game';
 import { IStats, stats } from './stats';
 import Text from './Text';
@@ -87,18 +87,22 @@ export default class SceneStats extends Container {
   }
 
   public showStats() {
-    Array.from(statsDisplay.entries()).forEach(([key, label], i: number) => {
+    Array.from(statsDisplay.entries()).forEach(([key, label], idx: number) => {
       const name = new Text(label, {
         align: 'left'
       });
 
       name.x = 100;
-      name.y = 175 + i * name.height * 1.45;
+      name.y = 175 + idx * name.height * 1.45;
 
       let stat: string | number = stats[key];
 
-      if (key === 'avgScore' || key === 'avgWordLength') {
+      if (key === 'avgWordLength') {
         stat = stat.toFixed(2);
+      }
+
+      if (key === 'avgScore') {
+        stat = Math.round(stat);
       }
 
       const value = new Text(`${stat}`, {
@@ -106,11 +110,32 @@ export default class SceneStats extends Container {
       });
 
       value.x = VIEW_W - 100;
-      value.y = 175 + i * value.height * 1.45;
+      value.y = 175 + idx * value.height * 1.45;
       value.anchor.set(1, 0);
 
       this.stats.addChild(name);
       this.stats.addChild(value);
+
+      // draw dots
+      const dotWidth = 3.5;
+      const dotSpacing = 5;
+      const distance = value.x - value.width - name.x - name.width;
+      const numOfDots = distance / (dotWidth + dotSpacing) - 1;
+
+      const dots = new Container();
+
+      for (let i = 0; i < numOfDots; i++) {
+        const dot = new Graphics();
+        dot.beginFill(utils.string2hex(COLOR_TEXT));
+        dot.drawCircle(i * (dotWidth + dotSpacing), 0, dotWidth / 2);
+        dot.endFill();
+        dots.addChild(dot);
+      }
+
+      dots.x = name.x + name.width + dotSpacing;
+      dots.y = name.y + name.height - dots.height - 5; // magic number
+
+      this.stats.addChild(dots);
     });
 
     this.fadeIn().finished.then(() => {

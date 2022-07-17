@@ -28520,24 +28520,42 @@ void main() {
       });
     }
     showStats() {
-      Array.from(statsDisplay.entries()).forEach(([key, label], i) => {
+      Array.from(statsDisplay.entries()).forEach(([key, label], idx) => {
         const name = new Text2(label, {
           align: "left"
         });
         name.x = 100;
-        name.y = 175 + i * name.height * 1.45;
+        name.y = 175 + idx * name.height * 1.45;
         let stat = stats[key];
-        if (key === "avgScore" || key === "avgWordLength") {
+        if (key === "avgWordLength") {
           stat = stat.toFixed(2);
+        }
+        if (key === "avgScore") {
+          stat = Math.round(stat);
         }
         const value = new Text2(`${stat}`, {
           align: "right"
         });
         value.x = VIEW_W - 100;
-        value.y = 175 + i * value.height * 1.45;
+        value.y = 175 + idx * value.height * 1.45;
         value.anchor.set(1, 0);
         this.stats.addChild(name);
         this.stats.addChild(value);
+        const dotWidth = 3.5;
+        const dotSpacing = 5;
+        const distance = value.x - value.width - name.x - name.width;
+        const numOfDots = distance / (dotWidth + dotSpacing) - 1;
+        const dots = new Container();
+        for (let i = 0; i < numOfDots; i++) {
+          const dot = new Graphics();
+          dot.beginFill(utils_exports.string2hex(COLOR_TEXT));
+          dot.drawCircle(i * (dotWidth + dotSpacing), 0, dotWidth / 2);
+          dot.endFill();
+          dots.addChild(dot);
+        }
+        dots.x = name.x + name.width + dotSpacing;
+        dots.y = name.y + name.height - dots.height - 5;
+        this.stats.addChild(dots);
       });
       this.fadeIn().finished.then(() => {
         this.doneButton.interactive = true;
