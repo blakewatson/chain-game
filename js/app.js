@@ -1589,26 +1589,26 @@
     "node_modules/pubsub-js/src/pubsub.js"(exports, module) {
       (function(root, factory) {
         "use strict";
-        var PubSub3 = {};
+        var PubSub4 = {};
         if (root.PubSub) {
-          PubSub3 = root.PubSub;
+          PubSub4 = root.PubSub;
           console.warn("PubSub already loaded, using existing version");
         } else {
-          root.PubSub = PubSub3;
-          factory(PubSub3);
+          root.PubSub = PubSub4;
+          factory(PubSub4);
         }
         if (typeof exports === "object") {
           if (module !== void 0 && module.exports) {
-            exports = module.exports = PubSub3;
+            exports = module.exports = PubSub4;
           }
-          exports.PubSub = PubSub3;
-          module.exports = exports = PubSub3;
+          exports.PubSub = PubSub4;
+          module.exports = exports = PubSub4;
         } else if (typeof define === "function" && define.amd) {
           define(function() {
-            return PubSub3;
+            return PubSub4;
           });
         }
-      })(typeof window === "object" && window || exports, function(PubSub3) {
+      })(typeof window === "object" && window || exports, function(PubSub4) {
         "use strict";
         var messages = {}, lastUid = -1, ALL_SUBSCRIBING_MSG = "*";
         function hasKeys(obj) {
@@ -1684,13 +1684,13 @@
           }
           return true;
         }
-        PubSub3.publish = function(message, data) {
-          return publish(message, data, false, PubSub3.immediateExceptions);
+        PubSub4.publish = function(message, data) {
+          return publish(message, data, false, PubSub4.immediateExceptions);
         };
-        PubSub3.publishSync = function(message, data) {
-          return publish(message, data, true, PubSub3.immediateExceptions);
+        PubSub4.publishSync = function(message, data) {
+          return publish(message, data, true, PubSub4.immediateExceptions);
         };
-        PubSub3.subscribe = function(message, func) {
+        PubSub4.subscribe = function(message, func) {
           if (typeof func !== "function") {
             return false;
           }
@@ -1702,20 +1702,20 @@
           messages[message][token] = func;
           return token;
         };
-        PubSub3.subscribeAll = function(func) {
-          return PubSub3.subscribe(ALL_SUBSCRIBING_MSG, func);
+        PubSub4.subscribeAll = function(func) {
+          return PubSub4.subscribe(ALL_SUBSCRIBING_MSG, func);
         };
-        PubSub3.subscribeOnce = function(message, func) {
-          var token = PubSub3.subscribe(message, function() {
-            PubSub3.unsubscribe(token);
+        PubSub4.subscribeOnce = function(message, func) {
+          var token = PubSub4.subscribe(message, function() {
+            PubSub4.unsubscribe(token);
             func.apply(this, arguments);
           });
-          return PubSub3;
+          return PubSub4;
         };
-        PubSub3.clearAllSubscriptions = function clearAllSubscriptions() {
+        PubSub4.clearAllSubscriptions = function clearAllSubscriptions() {
           messages = {};
         };
-        PubSub3.clearSubscriptions = function clearSubscriptions(topic) {
+        PubSub4.clearSubscriptions = function clearSubscriptions(topic) {
           var m;
           for (m in messages) {
             if (Object.prototype.hasOwnProperty.call(messages, m) && m.indexOf(topic) === 0) {
@@ -1723,7 +1723,7 @@
             }
           }
         };
-        PubSub3.countSubscriptions = function countSubscriptions(topic) {
+        PubSub4.countSubscriptions = function countSubscriptions(topic) {
           var m;
           var token;
           var count = 0;
@@ -1737,7 +1737,7 @@
           }
           return count;
         };
-        PubSub3.getSubscriptions = function getSubscriptions(topic) {
+        PubSub4.getSubscriptions = function getSubscriptions(topic) {
           var m;
           var list = [];
           for (m in messages) {
@@ -1747,7 +1747,7 @@
           }
           return list;
         };
-        PubSub3.unsubscribe = function(value) {
+        PubSub4.unsubscribe = function(value) {
           var descendantTopicExists = function(topic) {
             var m2;
             for (m2 in messages) {
@@ -1758,7 +1758,7 @@
             return false;
           }, isTopic = typeof value === "string" && (Object.prototype.hasOwnProperty.call(messages, value) || descendantTopicExists(value)), isToken = !isTopic && typeof value === "string", isFunction = typeof value === "function", result = false, m, message, t;
           if (isTopic) {
-            PubSub3.clearSubscriptions(value);
+            PubSub4.clearSubscriptions(value);
             return;
           }
           for (m in messages) {
@@ -28029,10 +28029,7 @@ void main() {
   var anime_es_default = anime;
 
   // ts/Game.ts
-  var import_pubsub_js2 = __toESM(require_pubsub());
-
-  // ts/Button.ts
-  var import_pubsub_js = __toESM(require_pubsub());
+  var import_pubsub_js3 = __toESM(require_pubsub());
 
   // ts/constants.ts
   var VIEW_W = 800;
@@ -28063,6 +28060,12 @@ void main() {
   var HELP_CLICK = "help-click";
   var PLAY_CLICK = "play-click";
   var TILE_CLICK = "tile-click";
+
+  // ts/SceneMenu.ts
+  var import_pubsub_js2 = __toESM(require_pubsub());
+
+  // ts/Button.ts
+  var import_pubsub_js = __toESM(require_pubsub());
 
   // ts/Text.ts
   var Text2 = class extends Text {
@@ -28262,6 +28265,126 @@ void main() {
     }
   };
 
+  // ts/SceneMenu.ts
+  var SceneMenu = class extends Container {
+    constructor() {
+      super();
+      this.credits = null;
+      this.finalScore = null;
+      this.game = null;
+      this.helpButton = null;
+      this.playButton = null;
+    }
+    fadeIn() {
+      const anim = this.fadeOut(false);
+      anim.seek(150);
+      anim.reverse();
+      anim.play();
+      anim.finished.then(() => {
+        this.playButton.setClickable(true);
+        this.helpButton.setClickable(true);
+      });
+      return anim;
+    }
+    fadeOut(autoplay = true) {
+      this.playButton.setClickable(false);
+      this.helpButton.setClickable(false);
+      return anime_es_default({
+        targets: {
+          alpha: 1
+        },
+        alpha: 0,
+        duration: 150,
+        easing: "linear",
+        autoplay,
+        update: (anim) => {
+          const obj = anim.animatables[0].target;
+          this.alpha = obj.alpha;
+        }
+      });
+    }
+    init(game) {
+      this.game = game;
+      this.width = VIEW_W;
+      this.height = VIEW_H;
+      this.initPlayButton();
+      this.initHelpButton();
+      this.initCredits();
+      this.listenForHelpClick();
+      this.listenForPlayClick();
+    }
+    initCredits() {
+      this.credits = new Text2("created by Tim and Blake Watson", {
+        fill: COLOR_WHITE,
+        fontSize: 24,
+        dropShadow: true,
+        dropShadowAngle: 90,
+        dropShadowBlur: 3,
+        dropShadowDistance: 3,
+        dropShadowColor: "#000000",
+        dropShadowAlpha: 0.33
+      });
+      this.credits.anchor.set(0.5);
+      this.credits.x = VIEW_W / 2;
+      this.credits.y = VIEW_H - this.credits.height - 20;
+      this.addChild(this.credits);
+    }
+    initFinalScore(score) {
+      this.finalScore = new Text2(`Final Score: ${score}`);
+      this.finalScore.anchor.set(0.5);
+      this.finalScore.x = VIEW_W / 2;
+      this.finalScore.y = VIEW_H / 2 - 90;
+      this.addChild(this.finalScore);
+    }
+    initHelpButton() {
+      this.helpButton = new Button({
+        label: "How to play",
+        clickEventName: HELP_CLICK
+      });
+      this.helpButton.x = VIEW_W / 2 - this.helpButton.width / 2;
+      this.helpButton.y = VIEW_H / 2 + this.helpButton.height;
+      this.addChild(this.helpButton);
+    }
+    initPlayButton() {
+      this.playButton = new Button({
+        label: "Play",
+        clickEventName: PLAY_CLICK
+      });
+      this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
+      this.playButton.y = VIEW_H / 2 - this.playButton.height / 2;
+      this.addChild(this.playButton);
+    }
+    listenForHelpClick() {
+      import_pubsub_js2.default.subscribe(HELP_CLICK, () => {
+        this.playButton.setClickable(false);
+        this.helpButton.setClickable(false);
+        this.game.title.moveUp();
+        this.fadeOut().finished.then(() => {
+          this.game.drawHelpScreen();
+        });
+      });
+    }
+    listenForPlayClick() {
+      import_pubsub_js2.default.subscribe(PLAY_CLICK, () => {
+        this.playButton.setClickable(false);
+        this.helpButton.setClickable(false);
+        this.game.initGame(true);
+        this.game.title.moveUp();
+        this.fadeOut().finished.then(() => {
+          this.playButton.updateLabel("Play Again");
+          this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
+        });
+      });
+    }
+    updateFinalScore(score) {
+      if (!this.finalScore) {
+        this.initFinalScore(score);
+        return;
+      }
+      this.finalScore.text = `Final Score: ${score}`;
+    }
+  };
+
   // ts/stats.ts
   var stats = {
     avgScore: 0,
@@ -28283,8 +28406,6 @@ void main() {
     localStorage.setItem("chain-stats", JSON.stringify(stats));
   };
   var handleWordLength = (wordLength) => {
-    console.log("word length: ", wordLength);
-    console.log((stats.avgWordLength * stats.numberWords + wordLength) / (stats.numberWords + 1));
     stats.avgWordLength = (stats.avgWordLength * stats.numberWords + wordLength) / (stats.numberWords + 1);
     stats.numberWords++;
     saveStats();
@@ -28434,6 +28555,59 @@ void main() {
     }
   };
 
+  // ts/Title.ts
+  var Title = class extends Text2 {
+    constructor(text) {
+      super(text, {
+        fontSize: 84,
+        align: "center",
+        fill: COLOR_TITLE,
+        dropShadow: true,
+        dropShadowColor: "#000000",
+        dropShadowDistance: 3,
+        dropShadowAngle: 90,
+        dropShadowBlur: 3,
+        dropShadowAlpha: 0.33
+      });
+      this.animDefaults = {
+        duration: 300,
+        easing: "easeInOutSine",
+        update: (anim) => {
+          const obj = anim.animatables[0].target;
+          if (obj.y) {
+            this.y = obj.y;
+          }
+        }
+      };
+      this.x = VIEW_W / 2 - this.width / 2;
+      this.y = 100;
+    }
+    moveDown() {
+      if (this.y === 100) {
+        return;
+      }
+      anime_es_default({
+        targets: {
+          y: 50
+        },
+        y: 100,
+        ...this.animDefaults
+      });
+    }
+    moveUp() {
+      if (this.y === 50) {
+        return;
+      }
+      anime_es_default({
+        targets: {
+          y: 100
+        },
+        y: 50,
+        ...this.animDefaults
+      });
+    }
+  };
+
   // ts/Game.ts
   var Game = class {
     constructor(ticker, resources2) {
@@ -28446,24 +28620,20 @@ void main() {
       this.gameElements = null;
       this.getNextLetter = letterGenerator();
       this.h = VIEW_H;
-      this.helpButton = null;
       this.helpSlide = new Container();
       this.lastTime = 0;
-      this.menuElements = new Container();
-      this.playButton = null;
       this.preventClicksPromises = [];
       this.resources = null;
+      this.sceneMenu = new SceneMenu();
       this.score = 0;
       this.ticker = null;
       this.tileEntryPoint = { x: 0, y: 0 };
+      this.title = null;
       this.turns = INITIAL_TURNS;
       this.w = VIEW_W;
       this.wordList = [];
       this.text = {
-        credits: null,
-        finalScore: null,
         score: null,
-        title: null,
         turns: null,
         turnScore: null
       };
@@ -28476,11 +28646,12 @@ void main() {
       this.ticker = ticker;
       this.resources = resources2;
       document.querySelector("#app")?.append(this.app.view);
-      this.initTitle();
-      this.initMenuElements();
+      this.title = new Title("Chain");
+      this.addChild(this.title);
+      this.sceneMenu.init(this);
+      this.addChild(this.sceneMenu);
+      this.addChild(this.helpSlide);
       this.initGameElements();
-      this.listenForHelpClick();
-      this.listenForPlayClick();
       this.listenForTileClick();
       this.ticker.add(this.update.bind(this));
       this.ticker.start();
@@ -28514,31 +28685,10 @@ void main() {
           this.drawHelpScreen(2);
           return;
         }
-        anime_es_default({
-          targets: {
-            alpha: 0,
-            y: this.text.title.y
-          },
-          alpha: {
-            value: 1,
-            duration: 150,
-            easing: "linear"
-          },
-          y: "+=50",
-          duration: 500,
-          easing: "easeInOutSine",
-          update: (anim) => {
-            const obj = anim.animatables[0].target;
-            this.menuElements.alpha = obj.alpha;
-            if (!this.text.finalScore) {
-              this.text.title.y = obj.y;
-            }
-          },
-          complete: (anim) => {
-            this.playButton.setClickable(true);
-            this.helpButton.setClickable(true);
-          }
-        });
+        if (!this.sceneMenu.finalScore) {
+          this.title.moveDown();
+        }
+        this.sceneMenu.fadeIn();
       });
     }
     async endGame() {
@@ -28550,31 +28700,9 @@ void main() {
       this.animationGameEnter.play();
       await this.animationGameEnter.finished;
       this.animationGameEnter.reverse();
-      if (!this.text.finalScore) {
-        this.text.finalScore = new Text2(`Final Score: ${this.score}`, {});
-        this.text.finalScore.anchor.set(0.5);
-        this.text.finalScore.x = VIEW_W / 2;
-        this.text.finalScore.y = VIEW_H / 2 - 90;
-        this.menuElements.addChild(this.text.finalScore);
-      } else {
-        this.text.finalScore.text = `Final Score: ${this.score}`;
-      }
-      anime_es_default({
-        targets: {
-          alpha: 0
-        },
-        alpha: 1,
-        duration: 300,
-        easing: "linear",
-        update: (anim) => {
-          const obj = anim.animatables[0].target;
-          this.menuElements.alpha = obj.alpha;
-        },
-        complete: () => {
-          this.playButton.setClickable(true);
-          this.helpButton.setClickable(true);
-          done();
-        }
+      this.sceneMenu.updateFinalScore(this.score);
+      this.sceneMenu.fadeIn().finished.then(() => {
+        done();
       });
       handleScore(this.score);
     }
@@ -28614,22 +28742,6 @@ void main() {
       this.boardBg.x = VIEW_W / 2 - this.boardBg.width / 2;
       this.boardBg.y = VIEW_H / 2 - TILE_H;
     }
-    initCredits() {
-      this.text.credits = new Text2("created by Tim and Blake Watson", {
-        fill: COLOR_WHITE,
-        fontSize: 24,
-        dropShadow: true,
-        dropShadowAngle: 90,
-        dropShadowBlur: 3,
-        dropShadowDistance: 3,
-        dropShadowColor: "#000000",
-        dropShadowAlpha: 0.33
-      });
-      this.text.credits.anchor.set(0.5);
-      this.text.credits.x = VIEW_W / 2;
-      this.text.credits.y = VIEW_H - this.text.credits.height - 20;
-      this.menuElements.addChild(this.text.credits);
-    }
     initGame(animateIn = false) {
       if (this.turns === 0) {
         this.resetGame();
@@ -28668,33 +28780,6 @@ void main() {
       this.gameElements.height = this.app.view.height;
       this.addChild(this.gameElements);
     }
-    initHelpButton() {
-      this.helpButton = new Button({
-        label: "How to play",
-        clickEventName: HELP_CLICK
-      });
-      this.helpButton.x = VIEW_W / 2 - this.helpButton.width / 2;
-      this.helpButton.y = VIEW_H / 2 + this.helpButton.height;
-      this.menuElements.addChild(this.helpButton);
-      this.addChild(this.helpSlide);
-    }
-    initMenuElements() {
-      this.menuElements.width = this.app.view.width;
-      this.menuElements.height = this.app.view.height;
-      this.initPlayButton();
-      this.initHelpButton();
-      this.initCredits();
-      this.addChild(this.menuElements);
-    }
-    initPlayButton() {
-      this.playButton = new Button({
-        label: "Play",
-        clickEventName: PLAY_CLICK
-      });
-      this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
-      this.playButton.y = VIEW_H / 2 - this.playButton.height / 2;
-      this.menuElements.addChild(this.playButton);
-    }
     initTextScore() {
       this.text.score = new Text2("Score: 0", {
         align: "left"
@@ -28729,83 +28814,8 @@ void main() {
       this.text.turnScore.alpha = 0;
       this.gameElements.addChild(this.text.turnScore);
     }
-    initTitle() {
-      this.text.title = new Text2("Chain", {
-        fontFamily: "Ships Whistle",
-        fontSize: 84,
-        align: "center",
-        fill: COLOR_TITLE,
-        dropShadow: true,
-        dropShadowColor: "#000000",
-        dropShadowDistance: 3,
-        dropShadowAngle: 90,
-        dropShadowBlur: 3,
-        dropShadowAlpha: 0.33
-      });
-      this.text.title.x = VIEW_W / 2 - this.text.title.width / 2;
-      this.text.title.y = 100;
-      this.addChild(this.text.title);
-    }
-    listenForHelpClick() {
-      import_pubsub_js2.default.subscribe(HELP_CLICK, () => {
-        this.playButton.setClickable(false);
-        this.helpButton.setClickable(false);
-        anime_es_default({
-          targets: {
-            alpha: 1,
-            y: this.text.title.y
-          },
-          alpha: {
-            value: 0,
-            duration: 150,
-            easing: "linear"
-          },
-          y: 50,
-          duration: 500,
-          easing: "easeInOutSine",
-          update: (anim) => {
-            const obj = anim.animatables[0].target;
-            this.text.title.y = obj.y;
-            this.menuElements.alpha = obj.alpha;
-          },
-          complete: () => {
-            this.drawHelpScreen();
-          }
-        });
-      });
-    }
-    listenForPlayClick() {
-      import_pubsub_js2.default.subscribe(PLAY_CLICK, () => {
-        this.playButton.setClickable(false);
-        this.helpButton.setClickable(false);
-        this.initGame(true);
-        anime_es_default({
-          targets: {
-            alpha: 1,
-            y: this.text.title.y
-          },
-          alpha: {
-            value: 0,
-            duration: 150,
-            easing: "linear"
-          },
-          y: 50,
-          duration: 500,
-          easing: "easeInOutSine",
-          update: (anim) => {
-            const obj = anim.animatables[0].target;
-            this.text.title.y = obj.y;
-            this.menuElements.alpha = obj.alpha;
-          },
-          complete: (anim) => {
-            this.playButton.updateLabel("Play Again");
-            this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
-          }
-        });
-      });
-    }
     listenForTileClick() {
-      import_pubsub_js2.default.subscribe(TILE_CLICK, async (msg, tile) => {
+      import_pubsub_js3.default.subscribe(TILE_CLICK, async (msg, tile) => {
         if (this.preventClicksPromises.length || !this.turns) {
           return;
         }

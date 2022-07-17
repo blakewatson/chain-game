@@ -161,10 +161,6 @@ export default class Tile extends Button {
     const dx = x - bounds.x;
     const dy = y - bounds.y;
 
-    // console.log(bounds.x, bounds.y);
-    // console.log(this.x, this.y);
-    // console.log(dx, dy);
-
     return anime({
       targets: {
         x: this.x,

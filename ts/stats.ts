@@ -33,11 +33,6 @@ export const saveStats = () => {
 };
 
 export const handleWordLength = (wordLength: number) => {
-  console.log('word length: ', wordLength);
-  console.log(
-    (stats.avgWordLength * stats.numberWords + wordLength) /
-      (stats.numberWords + 1)
-  );
   stats.avgWordLength =
     (stats.avgWordLength * stats.numberWords + wordLength) /
     (stats.numberWords + 1);

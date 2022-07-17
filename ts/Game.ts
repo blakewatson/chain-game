@@ -11,16 +11,11 @@ import {
   utils
 } from 'pixi.js';
 import PubSub from 'pubsub-js';
-import Button from './Button';
 import {
   COLOR_BG,
   COLOR_SLOT,
   COLOR_TEXT_TURN_SCORE,
-  COLOR_TITLE,
-  COLOR_WHITE,
-  HELP_CLICK,
   INITIAL_TURNS,
-  PLAY_CLICK,
   SLOT_H,
   SLOT_W,
   TILE_CLICK,
@@ -29,6 +24,7 @@ import {
   VIEW_H,
   VIEW_W
 } from './constants';
+import SceneMenu from './SceneMenu';
 import {
   handleComboStreak,
   handleScore,
@@ -37,13 +33,11 @@ import {
 } from './stats';
 import Text from './Text';
 import Tile from './Tile';
+import Title from './Title';
 import { getRandomLetter, letterGenerator } from './utils';
 
 interface ITextElements {
-  credits: Text | null;
-  finalScore: Text | null;
   score: Text | null;
-  title: Text | null;
   turns: Text | null;
   turnScore: Text | null;
 }
@@ -58,25 +52,21 @@ export default class Game {
   public gameElements: Container | null = null;
   public getNextLetter = letterGenerator();
   public h: number = VIEW_H;
-  public helpButton: Button | null = null;
   public helpSlide: Container = new Container();
   public lastTime: number = 0;
-  public menuElements: Container = new Container();
-  public playButton: Button | null = null;
   public preventClicksPromises: Promise<any>[] = [];
   public resources: Dict<LoaderResource> | null = null;
+  public sceneMenu: SceneMenu = new SceneMenu();
   public score = 0;
   public ticker: Ticker | null = null;
   public tileEntryPoint: { x: number; y: number } = { x: 0, y: 0 };
+  public title: Title | null = null;
   public turns = INITIAL_TURNS;
   public w: number = VIEW_W;
   public wordList: string[] = [];
 
   public text: ITextElements = {
-    credits: null,
-    finalScore: null,
     score: null,
-    title: null,
     turns: null,
     turnScore: null
   };
@@ -94,12 +84,16 @@ export default class Game {
 
     document.querySelector('#app')?.append(this.app.view);
 
-    this.initTitle();
-    this.initMenuElements();
+    this.title = new Title('Chain');
+    this.addChild(this.title);
+
+    this.sceneMenu.init(this);
+    this.addChild(this.sceneMenu);
+
+    this.addChild(this.helpSlide);
+
     this.initGameElements();
 
-    this.listenForHelpClick();
-    this.listenForPlayClick();
     this.listenForTileClick();
 
     this.ticker.add(this.update.bind(this));
@@ -129,12 +123,15 @@ export default class Game {
 
   public drawHelpScreen(screen: 1 | 2 = 1) {
     const key = screen === 1 ? 'help_1' : 'help_2';
+
     const helpImg = new Sprite(this.resources[key].texture);
     helpImg.width = VIEW_W;
     helpImg.height = VIEW_H;
     helpImg.buttonMode = true;
     helpImg.interactive = true;
+
     this.helpSlide.addChild(helpImg);
+
     helpImg.addListener('click', () => {
       this.helpSlide.removeChild(helpImg);
 
@@ -143,34 +140,11 @@ export default class Game {
         return;
       }
 
-      anime({
-        targets: {
-          alpha: 0,
-          y: this.text.title.y
-        },
-        alpha: {
-          value: 1,
-          duration: 150,
-          easing: 'linear'
-        },
-        y: '+=50',
-        duration: 500,
-        easing: 'easeInOutSine',
+      if (!this.sceneMenu.finalScore) {
+        this.title.moveDown();
+      }
 
-        update: (anim) => {
-          const obj = anim.animatables[0].target as any;
-          this.menuElements.alpha = obj.alpha;
-
-          if (!this.text.finalScore) {
-            this.text.title.y = obj.y;
-          }
-        },
-
-        complete: (anim) => {
-          this.playButton.setClickable(true);
-          this.helpButton.setClickable(true);
-        }
-      });
+      this.sceneMenu.fadeIn();
     });
   }
 
@@ -187,36 +161,11 @@ export default class Game {
     await this.animationGameEnter.finished;
     this.animationGameEnter.reverse();
 
-    // create final score text if needed
-    if (!this.text.finalScore) {
-      this.text.finalScore = new Text(`Final Score: ${this.score}`, {});
-      this.text.finalScore.anchor.set(0.5);
-      this.text.finalScore.x = VIEW_W / 2;
-      this.text.finalScore.y = VIEW_H / 2 - 90;
-      this.menuElements.addChild(this.text.finalScore);
-    } else {
-      this.text.finalScore.text = `Final Score: ${this.score}`;
-    }
+    this.sceneMenu.updateFinalScore(this.score);
 
     // fade in end scene
-    anime({
-      targets: {
-        alpha: 0
-      },
-      alpha: 1,
-      duration: 300,
-      easing: 'linear',
-
-      update: (anim) => {
-        const obj = anim.animatables[0].target as any;
-        this.menuElements.alpha = obj.alpha;
-      },
-
-      complete: () => {
-        this.playButton.setClickable(true);
-        this.helpButton.setClickable(true);
-        done();
-      }
+    this.sceneMenu.fadeIn().finished.then(() => {
+      done();
     });
 
     // final score stats
@@ -269,25 +218,6 @@ export default class Game {
     this.boardBg.y = VIEW_H / 2 - TILE_H;
   }
 
-  public initCredits() {
-    this.text.credits = new Text('created by Tim and Blake Watson', {
-      fill: COLOR_WHITE,
-      fontSize: 24,
-      dropShadow: true,
-      dropShadowAngle: 90,
-      dropShadowBlur: 3,
-      dropShadowDistance: 3,
-      dropShadowColor: '#000000',
-      dropShadowAlpha: 0.33
-    });
-
-    this.text.credits.anchor.set(0.5);
-    this.text.credits.x = VIEW_W / 2;
-    this.text.credits.y = VIEW_H - this.text.credits.height - 20;
-
-    this.menuElements.addChild(this.text.credits);
-  }
-
   public initGame(animateIn: boolean = false) {
     if (this.turns === 0) {
       this.resetGame();
@@ -335,42 +265,6 @@ export default class Game {
     this.addChild(this.gameElements);
   }
 
-  public initHelpButton() {
-    this.helpButton = new Button({
-      label: 'How to play',
-      clickEventName: HELP_CLICK
-    });
-
-    this.helpButton.x = VIEW_W / 2 - this.helpButton.width / 2;
-    this.helpButton.y = VIEW_H / 2 + this.helpButton.height;
-
-    this.menuElements.addChild(this.helpButton);
-    this.addChild(this.helpSlide);
-  }
-
-  public initMenuElements() {
-    this.menuElements.width = this.app.view.width;
-    this.menuElements.height = this.app.view.height;
-
-    this.initPlayButton();
-    this.initHelpButton();
-    this.initCredits();
-
-    this.addChild(this.menuElements);
-  }
-
-  public initPlayButton() {
-    this.playButton = new Button({
-      label: 'Play',
-      clickEventName: PLAY_CLICK
-    });
-
-    this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
-    this.playButton.y = VIEW_H / 2 - this.playButton.height / 2;
-
-    this.menuElements.addChild(this.playButton);
-  }
-
   public initTextScore() {
     this.text.score = new Text('Score: 0', {
       align: 'left'
@@ -412,95 +306,6 @@ export default class Game {
     this.text.turnScore.alpha = 0;
 
     this.gameElements.addChild(this.text.turnScore);
-  }
-
-  public initTitle() {
-    this.text.title = new Text('Chain', {
-      fontFamily: 'Ships Whistle',
-      fontSize: 84,
-      align: 'center',
-      fill: COLOR_TITLE,
-      // stroke: '#BAB108',
-      // strokeThickness: 4,
-      dropShadow: true,
-      dropShadowColor: '#000000',
-      dropShadowDistance: 3,
-      dropShadowAngle: 90,
-      dropShadowBlur: 3,
-      dropShadowAlpha: 0.33
-    });
-
-    this.text.title.x = VIEW_W / 2 - this.text.title.width / 2;
-    this.text.title.y = 100;
-
-    this.addChild(this.text.title);
-  }
-
-  public listenForHelpClick() {
-    PubSub.subscribe(HELP_CLICK, () => {
-      this.playButton.setClickable(false);
-      this.helpButton.setClickable(false);
-
-      // fade out menu buttons
-      anime({
-        targets: {
-          alpha: 1,
-          y: this.text.title.y
-        },
-        alpha: {
-          value: 0,
-          duration: 150,
-          easing: 'linear'
-        },
-        y: 50,
-        duration: 500,
-        easing: 'easeInOutSine',
-
-        update: (anim) => {
-          const obj = anim.animatables[0].target as any;
-          this.text.title.y = obj.y;
-          this.menuElements.alpha = obj.alpha;
-        },
-
-        complete: () => {
-          this.drawHelpScreen();
-        }
-      });
-    });
-  }
-
-  public listenForPlayClick() {
-    PubSub.subscribe(PLAY_CLICK, () => {
-      this.playButton.setClickable(false);
-      this.helpButton.setClickable(false);
-      this.initGame(true);
-
-      anime({
-        targets: {
-          alpha: 1,
-          y: this.text.title.y
-        },
-        alpha: {
-          value: 0,
-          duration: 150,
-          easing: 'linear'
-        },
-        y: 50,
-        duration: 500,
-        easing: 'easeInOutSine',
-
-        update: (anim) => {
-          const obj = anim.animatables[0].target as any;
-          this.text.title.y = obj.y;
-          this.menuElements.alpha = obj.alpha;
-        },
-
-        complete: (anim) => {
-          this.playButton.updateLabel('Play Again');
-          this.playButton.x = VIEW_W / 2 - this.playButton.width / 2;
-        }
-      });
-    });
   }
 
   public listenForTileClick() {
