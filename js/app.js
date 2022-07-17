@@ -28436,11 +28436,9 @@ void main() {
   var handleWordLength = (wordLength) => {
     stats.avgWordLength = (stats.avgWordLength * stats.numberWords + wordLength) / (stats.numberWords + 1);
     stats.numberWords++;
-    saveStats();
   };
   var handleComboStreak = (combos) => {
     stats.highestComboStreak = Math.max(stats.highestComboStreak, combos);
-    saveStats();
   };
   var handleScore = (score) => {
     stats.avgScore = (stats.avgScore * stats.numberPlayed + score) / (stats.numberPlayed + 1);
@@ -28450,7 +28448,6 @@ void main() {
   };
   var handleTurnScore = (score) => {
     stats.highestTurnScore = Math.max(stats.highestTurnScore, score);
-    saveStats();
   };
 
   // ts/SceneStats.ts

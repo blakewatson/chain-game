@@ -38,13 +38,10 @@ export const handleWordLength = (wordLength: number) => {
     (stats.numberWords + 1);
 
   stats.numberWords++;
-
-  saveStats();
 };
 
 export const handleComboStreak = (combos: number) => {
   stats.highestComboStreak = Math.max(stats.highestComboStreak, combos);
-  saveStats();
 };
 
 export const handleScore = (score) => {
@@ -59,5 +56,4 @@ export const handleScore = (score) => {
 
 export const handleTurnScore = (score) => {
   stats.highestTurnScore = Math.max(stats.highestTurnScore, score);
-  saveStats();
 };
