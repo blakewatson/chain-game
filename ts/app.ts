@@ -1,6 +1,7 @@
 import { Dict } from '@pixi/utils';
 import { Loader, LoaderResource, Ticker } from 'pixi.js';
 import Game from './Game';
+import { loadStats } from './stats';
 
 const fontFace = new FontFace(
   'Ships Whistle',
@@ -29,6 +30,7 @@ function main(resources: Dict<LoaderResource>) {
   const ticker = Ticker.shared;
   ticker.autoStart = false;
   ticker.stop();
+  loadStats();
   new Game(ticker, resources);
 }
 

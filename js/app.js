@@ -28262,6 +28262,48 @@ void main() {
     }
   };
 
+  // ts/stats.ts
+  var stats = {
+    avgScore: 0,
+    avgWordLength: 0,
+    highestComboStreak: 0,
+    highestTurnScore: 0,
+    highScore: 0,
+    numberPlayed: 0,
+    numberWords: 0
+  };
+  var loadStats = () => {
+    const data = localStorage.getItem("chain-stats");
+    if (!data) {
+      return;
+    }
+    stats = JSON.parse(data);
+  };
+  var saveStats = () => {
+    localStorage.setItem("chain-stats", JSON.stringify(stats));
+  };
+  var handleWordLength = (wordLength) => {
+    console.log("word length: ", wordLength);
+    console.log((stats.avgWordLength * stats.numberWords + wordLength) / (stats.numberWords + 1));
+    stats.avgWordLength = (stats.avgWordLength * stats.numberWords + wordLength) / (stats.numberWords + 1);
+    stats.numberWords++;
+    saveStats();
+  };
+  var handleComboStreak = (combos) => {
+    stats.highestComboStreak = Math.max(stats.highestComboStreak, combos);
+    saveStats();
+  };
+  var handleScore = (score) => {
+    stats.avgScore = (stats.avgScore * stats.numberPlayed + score) / (stats.numberPlayed + 1);
+    stats.numberPlayed++;
+    stats.highScore = Math.max(stats.highScore, score);
+    saveStats();
+  };
+  var handleTurnScore = (score) => {
+    stats.highestTurnScore = Math.max(stats.highestTurnScore, score);
+    saveStats();
+  };
+
   // ts/Tile.ts
   var Tile = class extends Button {
     constructor(options) {
@@ -28534,6 +28576,7 @@ void main() {
           done();
         }
       });
+      handleScore(this.score);
     }
     initBank() {
       this.bank = new Container();
@@ -28868,6 +28911,9 @@ void main() {
           }
         });
         this.combo++;
+        handleWordLength(word.length);
+        handleTurnScore(score);
+        handleComboStreak(this.combo - 1);
       });
     }
     update(dt) {
@@ -28892,6 +28938,7 @@ void main() {
     const ticker = Ticker.shared;
     ticker.autoStart = false;
     ticker.stop();
+    loadStats();
     new Game(ticker, resources2);
   }
   async function getWordList() {

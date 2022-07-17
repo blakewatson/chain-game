@@ -29,6 +29,12 @@ import {
   VIEW_H,
   VIEW_W
 } from './constants';
+import {
+  handleComboStreak,
+  handleScore,
+  handleTurnScore,
+  handleWordLength
+} from './stats';
 import Text from './Text';
 import Tile from './Tile';
 import { getRandomLetter, letterGenerator } from './utils';
@@ -212,6 +218,9 @@ export default class Game {
         done();
       }
     });
+
+    // final score stats
+    handleScore(this.score);
   }
 
   public initBank() {
@@ -653,6 +662,16 @@ export default class Game {
 
       // update combo
       this.combo++;
+
+      // word stats
+      handleWordLength(word.length);
+
+      // turn score stats
+      handleTurnScore(score);
+
+      // combo stats... minus 1 because this.combo represents number of consecutive
+      // words and 1 word does not actually constitute a combo
+      handleComboStreak(this.combo - 1);
     });
   }
 
