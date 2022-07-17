@@ -423,11 +423,13 @@ export default class Game {
       Promise.all(successAnimations).then(() => done());
 
       // update score
-      let score = (word.length + word.length - 3) * (this.combo + 1);
+      let score = word.length + word.length - 3;
 
       if (word.length === 7) {
         score += 7;
       }
+
+      score *= this.combo + 1;
 
       this.score += score;
       this.text.score.text = `Score: ${this.score}`;

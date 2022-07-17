@@ -29025,10 +29025,11 @@ void main() {
         const done = this.preventClicksRequest();
         const successAnimations = tiles.map((tile) => tile.animationSuccess().finished);
         Promise.all(successAnimations).then(() => done());
-        let score = (word.length + word.length - 3) * (this.combo + 1);
+        let score = word.length + word.length - 3;
         if (word.length === 7) {
           score += 7;
         }
+        score *= this.combo + 1;
         this.score += score;
         this.text.score.text = `Score: ${this.score}`;
         const comboLabel = this.combo ? `Combo! x ${this.combo}` : "";
@@ -29072,7 +29073,7 @@ void main() {
   };
 
   // ts/app.ts
-  var fontFace = new FontFace("Ships Whistle", "url(../fonts/ShipsWhistle-Bold.woff2");
+  var fontFace = new FontFace("Ships Whistle", "url(fonts/ShipsWhistle-Bold.woff2");
   var fontFacePromise = fontFace.load();
   fontFacePromise.then((font) => {
     document.fonts.add(font);

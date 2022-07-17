@@ -5,7 +5,7 @@ import { loadStats } from './stats';
 
 const fontFace = new FontFace(
   'Ships Whistle',
-  'url(../fonts/ShipsWhistle-Bold.woff2'
+  'url(fonts/ShipsWhistle-Bold.woff2'
 );
 
 const fontFacePromise = fontFace.load();
