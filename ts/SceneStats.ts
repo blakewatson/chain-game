@@ -102,7 +102,7 @@ export default class SceneStats extends Container {
       }
 
       if (key === 'avgScore') {
-        stat = Math.round(stat);
+        stat = Math.round(stat as number);
       }
 
       const value = new Text(`${stat}`, {
