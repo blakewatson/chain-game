@@ -8,11 +8,13 @@ import {
   COLOR_SUCCESS_GRADIENT_BOTTOM,
   COLOR_SUCCESS_GRADIENT_TOP,
   COLOR_SUCCESS_TEXT,
+  LETTER_SCORES,
   SLOT_W,
   TILE_CLICK,
   TILE_H,
   TILE_W
 } from './constants';
+import Text from './Text';
 import { rgbFunctionToHex } from './utils';
 
 export interface ITileOptions {
@@ -26,6 +28,8 @@ export interface ITileOptions {
 export default class Tile extends Button {
   public animateIn = false;
   public letter = '';
+  public lastYPosition = 0;
+  public value: Text | null = null;
 
   public constructor(options: ITileOptions) {
     super({
@@ -40,10 +44,10 @@ export default class Tile extends Button {
       clickEventName: TILE_CLICK
     });
 
+    this.lastYPosition = options.y;
     this.letter = options.letter;
 
-    // better alignment for uppercase letter
-    this.text.y += 3;
+    this.createLetterValue();
 
     // animate entrance if necessary
     if (options.animateIn) {
@@ -126,34 +130,76 @@ export default class Tile extends Button {
   }
 
   public animationSuccess() {
-    return anime({
-      targets: {
-        topColor: COLOR_BUTTON_GRADIENT_TOP,
-        bottomColor: COLOR_BUTTON_GRADIENT_BOTTOM,
-        textColor: COLOR_BUTTON_TEXT,
-        y: this.y
-      },
-      topColor: COLOR_SUCCESS_GRADIENT_TOP,
-      bottomColor: COLOR_SUCCESS_GRADIENT_BOTTOM,
-      textColor: COLOR_SUCCESS_TEXT,
-      y: '-=50',
-      duration: 300,
-      endDelay: 500,
-      easing: 'easeInOutQuart',
-      direction: 'alternate',
-      loop: 1,
-      update: (anim) => {
-        const obj = anim.animatables[0].target as any;
+    return new Promise((resolve, reject) => {
+      anime({
+        targets: {
+          y: this.lastYPosition
+        },
+        y: '-=20',
+        duration: 500,
+        easing: 'easeOutQuart',
+        direction: 'alternate',
+        loop: 1,
 
-        this.applyBackground(
-          rgbFunctionToHex(obj.topColor),
-          rgbFunctionToHex(obj.bottomColor)
-        );
-        this.applyShadow(rgbFunctionToHex(obj.textColor, true));
-        this.applyTextStyle(obj.textColor);
-        this.y = obj.y;
-      }
+        update: (anim) => {
+          const obj = anim.animatables[0].target as any;
+          this.y = obj.y;
+        },
+
+        complete: (anim) => {
+          resolve(true);
+        }
+      });
+
+      anime({
+        targets: {
+          topColor: COLOR_BUTTON_GRADIENT_TOP,
+          bottomColor: COLOR_BUTTON_GRADIENT_BOTTOM,
+          textColor: COLOR_BUTTON_TEXT
+        },
+        topColor: COLOR_SUCCESS_GRADIENT_TOP,
+        bottomColor: COLOR_SUCCESS_GRADIENT_BOTTOM,
+        textColor: COLOR_SUCCESS_TEXT,
+        duration: 1000,
+        easing: 'linear',
+        direction: 'alternate',
+        loop: 1,
+
+        update: (anim) => {
+          const obj = anim.animatables[0].target as any;
+
+          this.applyBackground(
+            rgbFunctionToHex(obj.topColor),
+            rgbFunctionToHex(obj.bottomColor),
+            obj.textColor
+          );
+
+          this.applyShadow(rgbFunctionToHex(obj.textColor, true));
+
+          this.applyTextStyle(obj.textColor);
+
+          this.value.style = Object.assign({}, this.value.style, {
+            fill: obj.textColor
+          });
+        },
+
+        loopBegin: (anim) => {
+          // aanim.duration = 500;
+        }
+      });
     });
+  }
+
+  public createLetterValue() {
+    this.value = new Text(LETTER_SCORES[this.letter].toString(), {
+      fontSize: 18,
+      fill: COLOR_BUTTON_TEXT
+    });
+
+    this.value.x = TILE_W - this.value.width - 6;
+    this.value.y = TILE_H - this.value.height;
+
+    this.addChild(this.value);
   }
 
   public moveToPosition(x: number, y: number) {
@@ -169,10 +215,15 @@ export default class Tile extends Button {
       x: dx + this.x,
       y: dy + this.y,
       duration: 400,
+
       update: (anim) => {
         const obj = anim.animatables[0].target as unknown as IPoint;
         this.x = obj.x;
         this.y = obj.y;
+      },
+
+      complete: (anim) => {
+        this.lastYPosition = this.y;
       }
     });
   }

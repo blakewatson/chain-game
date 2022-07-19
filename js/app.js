@@ -28035,6 +28035,34 @@ void main() {
   var VIEW_W = 800;
   var VIEW_H = 600;
   var INITIAL_TURNS = 50;
+  var LETTER_SCORES = {
+    a: 1,
+    b: 3,
+    c: 3,
+    d: 2,
+    e: 1,
+    f: 4,
+    g: 2,
+    h: 4,
+    i: 1,
+    j: 8,
+    k: 5,
+    l: 1,
+    m: 3,
+    n: 1,
+    o: 1,
+    p: 3,
+    q: 10,
+    r: 1,
+    s: 1,
+    t: 1,
+    u: 1,
+    v: 4,
+    w: 4,
+    x: 8,
+    y: 4,
+    z: 10
+  };
   var COLOR_YELLOW = "#fcf100";
   var COLOR_WHITE = "#ffffff";
   var COLOR_BG = "#00ccff";
@@ -28052,11 +28080,12 @@ void main() {
   var COLOR_TITLE = COLOR_YELLOW;
   var SHADOW_Y = 6;
   var TILE_W = 60;
-  var TILE_H = 65 + SHADOW_Y;
+  var TILE_H = 70 + SHADOW_Y;
   var TILE_W_FULL = TILE_W + 2;
   var TILE_H_FULL = TILE_H + SHADOW_Y + 3;
   var SLOT_W = TILE_W_FULL * 1.25;
   var SLOT_H = TILE_H_FULL + TILE_W_FULL * 0.25;
+  var TURN_SCORE_TEXT_Y = VIEW_H / 2 - TILE_H - 50;
   var HELP_CLICK = "help-click";
   var PLAY_CLICK = "play-click";
   var STATS_CLICK = "stats-click";
@@ -28072,6 +28101,7 @@ void main() {
   var Text2 = class extends Text {
     constructor(initialText, initialStyle) {
       super(initialText);
+      this.currentAnimation = null;
       this.initialStyle = null;
       const defaultStyle2 = {
         fontFamily: "Ships Whistle",
@@ -28083,7 +28113,7 @@ void main() {
     }
     animate(options) {
       const animatedProperties = Object.keys(options.targets);
-      return anime_es_default({
+      this.currentAnimation = anime_es_default({
         ...options,
         update: (anim) => {
           const obj = anim.animatables[0].target;
@@ -28092,6 +28122,7 @@ void main() {
           });
         }
       });
+      return this.currentAnimation;
     }
   };
 
@@ -28473,7 +28504,8 @@ void main() {
       this.game = game;
       this.alpha = 0;
       this.doneButton = new Button({
-        label: "Done"
+        label: "Done",
+        clickable: false
       });
       this.doneButton.x = VIEW_W / 2 - this.doneButton.width / 2;
       this.doneButton.y = VIEW_H - this.doneButton.height - 20;
@@ -28577,8 +28609,11 @@ void main() {
       });
       this.animateIn = false;
       this.letter = "";
+      this.lastYPosition = 0;
+      this.value = null;
+      this.lastYPosition = options.y;
       this.letter = options.letter;
-      this.text.y += 3;
+      this.createLetterValue();
       if (options.animateIn) {
         this.animationEnter();
       }
@@ -28645,30 +28680,59 @@ void main() {
       });
     }
     animationSuccess() {
-      return anime_es_default({
-        targets: {
-          topColor: COLOR_BUTTON_GRADIENT_TOP,
-          bottomColor: COLOR_BUTTON_GRADIENT_BOTTOM,
-          textColor: COLOR_BUTTON_TEXT,
-          y: this.y
-        },
-        topColor: COLOR_SUCCESS_GRADIENT_TOP,
-        bottomColor: COLOR_SUCCESS_GRADIENT_BOTTOM,
-        textColor: COLOR_SUCCESS_TEXT,
-        y: "-=50",
-        duration: 300,
-        endDelay: 500,
-        easing: "easeInOutQuart",
-        direction: "alternate",
-        loop: 1,
-        update: (anim) => {
-          const obj = anim.animatables[0].target;
-          this.applyBackground(rgbFunctionToHex(obj.topColor), rgbFunctionToHex(obj.bottomColor));
-          this.applyShadow(rgbFunctionToHex(obj.textColor, true));
-          this.applyTextStyle(obj.textColor);
-          this.y = obj.y;
-        }
+      return new Promise((resolve3, reject2) => {
+        anime_es_default({
+          targets: {
+            y: this.lastYPosition
+          },
+          y: "-=20",
+          duration: 500,
+          easing: "easeOutQuart",
+          direction: "alternate",
+          loop: 1,
+          update: (anim) => {
+            const obj = anim.animatables[0].target;
+            this.y = obj.y;
+          },
+          complete: (anim) => {
+            resolve3(true);
+          }
+        });
+        anime_es_default({
+          targets: {
+            topColor: COLOR_BUTTON_GRADIENT_TOP,
+            bottomColor: COLOR_BUTTON_GRADIENT_BOTTOM,
+            textColor: COLOR_BUTTON_TEXT
+          },
+          topColor: COLOR_SUCCESS_GRADIENT_TOP,
+          bottomColor: COLOR_SUCCESS_GRADIENT_BOTTOM,
+          textColor: COLOR_SUCCESS_TEXT,
+          duration: 1e3,
+          easing: "linear",
+          direction: "alternate",
+          loop: 1,
+          update: (anim) => {
+            const obj = anim.animatables[0].target;
+            this.applyBackground(rgbFunctionToHex(obj.topColor), rgbFunctionToHex(obj.bottomColor), obj.textColor);
+            this.applyShadow(rgbFunctionToHex(obj.textColor, true));
+            this.applyTextStyle(obj.textColor);
+            this.value.style = Object.assign({}, this.value.style, {
+              fill: obj.textColor
+            });
+          },
+          loopBegin: (anim) => {
+          }
+        });
       });
+    }
+    createLetterValue() {
+      this.value = new Text2(LETTER_SCORES[this.letter].toString(), {
+        fontSize: 18,
+        fill: COLOR_BUTTON_TEXT
+      });
+      this.value.x = TILE_W - this.value.width - 6;
+      this.value.y = TILE_H - this.value.height;
+      this.addChild(this.value);
     }
     moveToPosition(x, y) {
       const bounds = this.getBounds();
@@ -28686,6 +28750,9 @@ void main() {
           const obj = anim.animatables[0].target;
           this.x = obj.x;
           this.y = obj.y;
+        },
+        complete: (anim) => {
+          this.lastYPosition = this.y;
         }
       });
     }
@@ -28744,6 +28811,69 @@ void main() {
     }
   };
 
+  // ts/TurnScore.ts
+  var TurnScore = class extends Text2 {
+    constructor(x, y) {
+      super("", {
+        align: "left",
+        fill: COLOR_TEXT_TURN_SCORE,
+        dropShadow: true,
+        dropShadowColor: "#000000",
+        dropShadowDistance: 3,
+        dropShadowAngle: 90,
+        dropShadowBlur: 3,
+        dropShadowAlpha: 0.33
+      });
+      this.animationTimeline = null;
+      this.startingYPosition = 0;
+      this.x = x;
+      this.y = y;
+      this.startingYPosition = y;
+      this.alpha = 0;
+    }
+    activate(score, combo = 0, offset = 0) {
+      if (this.animationTimeline) {
+        this.animationTimeline.pause();
+      }
+      const comboLabel = combo ? `Combo! x${combo}` : "";
+      this.text = `+${score} ${comboLabel}`;
+      this.x = offset;
+      this.animationTimeline = anime_es_default.timeline();
+      this.animationTimeline.add({
+        targets: {
+          alpha: 0
+        },
+        alpha: 1,
+        easing: "easeInSine",
+        endDelay: 1200,
+        delay: 100,
+        duration: 150,
+        update: (anim) => {
+          const obj = anim.animatables[0].target;
+          this.alpha = obj.alpha;
+        }
+      });
+      this.animationTimeline.add({
+        targets: {
+          alpha: 1,
+          y: this.startingYPosition
+        },
+        alpha: 0,
+        y: "-=10",
+        easing: "easeInSine",
+        duration: 300,
+        update: (anim) => {
+          const obj = anim.animatables[0].target;
+          this.alpha = obj.alpha;
+          this.y = obj.y;
+        },
+        complete: (anim) => {
+          this.y = this.startingYPosition;
+        }
+      });
+    }
+  };
+
   // ts/Game.ts
   var Game = class {
     constructor(ticker, resources2) {
@@ -28766,12 +28896,12 @@ void main() {
       this.tileEntryPoint = { x: 0, y: 0 };
       this.title = null;
       this.turns = INITIAL_TURNS;
+      this.turnScore = null;
       this.w = VIEW_W;
       this.wordList = [];
       this.text = {
         score: null,
-        turns: null,
-        turnScore: null
+        turns: null
       };
       this.app = new Application({
         width: VIEW_W,
@@ -28935,22 +29065,8 @@ void main() {
       this.gameElements.addChild(this.text.turns);
     }
     initTextTurnScore() {
-      this.text.turnScore = new Text2("", {
-        fontFamily: "Ships Whistle",
-        fontSize: 32,
-        align: "left",
-        fill: COLOR_TEXT_TURN_SCORE,
-        dropShadow: true,
-        dropShadowColor: "#000000",
-        dropShadowDistance: 3,
-        dropShadowAngle: 90,
-        dropShadowBlur: 3,
-        dropShadowAlpha: 0.33
-      });
-      this.text.turnScore.x = this.boardBg.x + SLOT_W * 0.125;
-      this.text.turnScore.y = this.boardBg.y - 80;
-      this.text.turnScore.alpha = 0;
-      this.gameElements.addChild(this.text.turnScore);
+      this.turnScore = new TurnScore(this.boardBg.x + SLOT_W * 0.125, this.boardBg.y - 50);
+      this.gameElements.addChild(this.turnScore);
     }
     listenForTileClick() {
       import_pubsub_js3.default.subscribe(TILE_CLICK, async (msg, tile) => {
@@ -28988,15 +29104,13 @@ void main() {
             this.checkForWord();
           }
         });
-        if (this.turns > 4) {
-          const newTile = new Tile({
-            letter: this.getNextLetter(),
-            x: currentPosition.x,
-            y: currentPosition.y,
-            animateIn: true
-          });
-          this.bank.addChild(newTile);
-        }
+        const newTile = new Tile({
+          letter: this.getNextLetter(),
+          x: currentPosition.x,
+          y: currentPosition.y,
+          animateIn: true
+        });
+        this.bank.addChild(newTile);
       });
     }
     preventClicksRequest() {
@@ -29019,46 +29133,16 @@ void main() {
     scoreWord(word, start = 0) {
       return new Promise((resolve3, reject2) => {
         const tiles = this.board.slice(start, word.length + start);
-        const done = this.preventClicksRequest();
-        const successAnimations = tiles.map((tile) => tile.animationSuccess().finished);
-        Promise.all(successAnimations).then(() => done());
-        let score = word.length + word.length - 3;
-        if (word.length === 7) {
-          score += 7;
-        }
-        score *= this.combo + 1;
+        const successAnimations = tiles.map((tile) => tile.animationSuccess());
+        Promise.all(successAnimations).then(() => resolve3(true));
+        let score = word.split("").reduce((total, letter) => total + LETTER_SCORES[letter], 0);
+        score *= word.length;
+        const sevenLetterBonus = word.length === 7 ? score : 0;
+        const comboBonus = this.combo > 0 ? score * this.combo : 0;
+        score += sevenLetterBonus + comboBonus;
         this.score += score;
         this.text.score.text = `Score: ${this.score}`;
-        const comboLabel = this.combo ? `Combo! x ${this.combo}` : "";
-        this.text.turnScore.text = `+${score} ${comboLabel}`;
-        this.text.turnScore.x = this.boardBg.x + SLOT_W * 0.125 + start * SLOT_W * 1.125;
-        const startingPosition = this.text.turnScore.y;
-        this.text.turnScore.animate({
-          targets: {
-            alpha: 0
-          },
-          alpha: 1,
-          easing: "easeInSine",
-          endDelay: 1200,
-          delay: 300,
-          duration: 500,
-          complete: (anim) => {
-            this.text.turnScore.animate({
-              targets: {
-                alpha: 1,
-                y: startingPosition
-              },
-              alpha: 0,
-              y: "-=10",
-              easing: "easeInSine",
-              duration: 300,
-              complete: () => {
-                this.text.turnScore.y = startingPosition;
-                resolve3(true);
-              }
-            });
-          }
-        });
+        this.turnScore.activate(score, this.combo, this.boardBg.x + SLOT_W * 0.125 + start * SLOT_W * 1.125);
         this.combo++;
         handleWordLength(word.length);
         handleTurnScore(score);

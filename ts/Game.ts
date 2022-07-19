@@ -14,8 +14,8 @@ import PubSub from 'pubsub-js';
 import {
   COLOR_BG,
   COLOR_SLOT,
-  COLOR_TEXT_TURN_SCORE,
   INITIAL_TURNS,
+  LETTER_SCORES,
   SLOT_H,
   SLOT_W,
   TILE_CLICK,
@@ -35,12 +35,12 @@ import {
 import Text from './Text';
 import Tile from './Tile';
 import Title from './Title';
+import TurnScore from './TurnScore';
 import { getRandomLetter, letterGenerator } from './utils';
 
 interface ITextElements {
   score: Text | null;
   turns: Text | null;
-  turnScore: Text | null;
 }
 
 export default class Game {
@@ -63,13 +63,13 @@ export default class Game {
   public tileEntryPoint: { x: number; y: number } = { x: 0, y: 0 };
   public title: Title | null = null;
   public turns = INITIAL_TURNS;
+  public turnScore: TurnScore | null = null;
   public w: number = VIEW_W;
   public wordList: string[] = [];
 
   public text: ITextElements = {
     score: null,
-    turns: null,
-    turnScore: null
+    turns: null
   };
 
   constructor(ticker: Ticker, resources: Dict<LoaderResource>) {
@@ -292,24 +292,11 @@ export default class Game {
   }
 
   public initTextTurnScore() {
-    this.text.turnScore = new Text('', {
-      fontFamily: 'Ships Whistle',
-      fontSize: 32,
-      align: 'left',
-      fill: COLOR_TEXT_TURN_SCORE,
-      dropShadow: true,
-      dropShadowColor: '#000000',
-      dropShadowDistance: 3,
-      dropShadowAngle: 90,
-      dropShadowBlur: 3,
-      dropShadowAlpha: 0.33
-    });
-
-    this.text.turnScore.x = this.boardBg.x + SLOT_W * 0.125;
-    this.text.turnScore.y = this.boardBg.y - 80;
-    this.text.turnScore.alpha = 0;
-
-    this.gameElements.addChild(this.text.turnScore);
+    this.turnScore = new TurnScore(
+      this.boardBg.x + SLOT_W * 0.125,
+      this.boardBg.y - 50
+    );
+    this.gameElements.addChild(this.turnScore);
   }
 
   public listenForTileClick() {
@@ -370,18 +357,14 @@ export default class Game {
         }
       });
 
-      // generate new letter tile in place of the one that was just played
-      // if the end of the game is coming, skip this step
-      if (this.turns > 4) {
-        const newTile = new Tile({
-          letter: this.getNextLetter(),
-          x: currentPosition.x,
-          y: currentPosition.y,
-          animateIn: true
-        });
+      const newTile = new Tile({
+        letter: this.getNextLetter(),
+        x: currentPosition.x,
+        y: currentPosition.y,
+        animateIn: true
+      });
 
-        this.bank.addChild(newTile);
-      }
+      this.bank.addChild(newTile);
     });
   }
 
@@ -416,60 +399,33 @@ export default class Game {
     return new Promise((resolve, reject) => {
       // animate word
       const tiles = this.board.slice(start, word.length + start);
-      const done = this.preventClicksRequest();
-      const successAnimations = tiles.map(
-        (tile) => tile.animationSuccess().finished
-      );
-      Promise.all(successAnimations).then(() => done());
+      // const done = this.preventClicksRequest();
+      const successAnimations = tiles.map((tile) => tile.animationSuccess());
+      Promise.all(successAnimations).then(() => resolve(true));
 
-      // update score
-      let score = word.length + word.length - 3;
+      // calculate word score
+      let score = word
+        .split('')
+        .reduce((total, letter) => total + LETTER_SCORES[letter], 0);
 
-      if (word.length === 7) {
-        score += 7;
-      }
+      // multiply by length
+      score *= word.length;
 
-      score *= this.combo + 1;
+      // bonuses
+      const sevenLetterBonus = word.length === 7 ? score : 0;
+      const comboBonus = this.combo > 0 ? score * this.combo : 0;
+
+      score += sevenLetterBonus + comboBonus;
 
       this.score += score;
       this.text.score.text = `Score: ${this.score}`;
 
       // update/animate turn score
-      const comboLabel = this.combo ? `Combo! x ${this.combo}` : '';
-      this.text.turnScore.text = `+${score} ${comboLabel}`;
-      this.text.turnScore.x =
-        this.boardBg.x + SLOT_W * 0.125 + start * SLOT_W * 1.125;
-
-      const startingPosition = this.text.turnScore.y;
-
-      this.text.turnScore.animate({
-        targets: {
-          alpha: 0
-        },
-        alpha: 1,
-        easing: 'easeInSine',
-        endDelay: 1200,
-        delay: 300,
-        duration: 500,
-
-        complete: (anim) => {
-          this.text.turnScore.animate({
-            targets: {
-              alpha: 1,
-              y: startingPosition
-            },
-            alpha: 0,
-            y: '-=10',
-            easing: 'easeInSine',
-            duration: 300,
-
-            complete: () => {
-              this.text.turnScore.y = startingPosition;
-              resolve(true);
-            }
-          });
-        }
-      });
+      this.turnScore.activate(
+        score,
+        this.combo,
+        this.boardBg.x + SLOT_W * 0.125 + start * SLOT_W * 1.125
+      );
 
       // update combo
       this.combo++;

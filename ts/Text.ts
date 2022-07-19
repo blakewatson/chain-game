@@ -1,8 +1,9 @@
-import anime, { AnimeParams } from 'animejs';
+import anime, { AnimeInstance, AnimeParams } from 'animejs';
 import { Text as PixiText, TextStyle } from 'pixi.js';
 import { COLOR_TEXT } from './constants';
 
 export default class Text extends PixiText {
+  public currentAnimation: AnimeInstance | null = null;
   public initialStyle: Partial<TextStyle> = null;
 
   public constructor(initialText: string, initialStyle?: Partial<TextStyle>) {
@@ -21,7 +22,7 @@ export default class Text extends PixiText {
   public animate(options: AnimeParams) {
     const animatedProperties = Object.keys(options.targets);
 
-    return anime({
+    this.currentAnimation = anime({
       ...options,
       update: (anim) => {
         const obj = anim.animatables[0].target as any;
@@ -31,5 +32,7 @@ export default class Text extends PixiText {
         });
       }
     });
+
+    return this.currentAnimation;
   }
 }

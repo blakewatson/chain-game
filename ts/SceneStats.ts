@@ -32,7 +32,8 @@ export default class SceneStats extends Container {
     this.alpha = 0;
 
     this.doneButton = new Button({
-      label: 'Done'
+      label: 'Done',
+      clickable: false
     });
 
     this.doneButton.x = VIEW_W / 2 - this.doneButton.width / 2;
