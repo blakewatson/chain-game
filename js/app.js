@@ -28900,6 +28900,7 @@ void main() {
       this.w = VIEW_W;
       this.wordList = [];
       this.text = {
+        lastWord: null,
         score: null,
         turns: null
       };
@@ -29022,6 +29023,9 @@ void main() {
       this.initTextScore();
       this.initTextTurnScore();
       this.initTextTurns();
+      this.initLastWord();
+      this.combo = 0;
+      this.getNextLetter = letterGenerator();
       const entryPoint = this.boardBg.children.at(-1).getBounds();
       this.tileEntryPoint = {
         x: entryPoint.x,
@@ -29047,6 +29051,12 @@ void main() {
       this.gameElements.width = this.app.view.width;
       this.gameElements.height = this.app.view.height;
       this.addChild(this.gameElements);
+    }
+    initLastWord() {
+      this.text.lastWord = new Text2("");
+      this.text.lastWord.x = this.text.score.x;
+      this.text.lastWord.y = this.text.turns.y;
+      this.gameElements.addChild(this.text.lastWord);
     }
     initTextScore() {
       this.text.score = new Text2("Score: 0", {
@@ -29144,6 +29154,7 @@ void main() {
         this.text.score.text = `Score: ${this.score}`;
         this.turnScore.activate(score, this.combo, this.boardBg.x + SLOT_W * 0.125 + start * SLOT_W * 1.125);
         this.combo++;
+        this.text.lastWord.text = word.toUpperCase();
         handleWordLength(word.length);
         handleTurnScore(score);
         handleComboStreak(this.combo - 1);

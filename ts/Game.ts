@@ -39,6 +39,7 @@ import TurnScore from './TurnScore';
 import { getRandomLetter, letterGenerator } from './utils';
 
 interface ITextElements {
+  lastWord: Text | null;
   score: Text | null;
   turns: Text | null;
 }
@@ -68,6 +69,7 @@ export default class Game {
   public wordList: string[] = [];
 
   public text: ITextElements = {
+    lastWord: null,
     score: null,
     turns: null
   };
@@ -237,6 +239,10 @@ export default class Game {
     this.initTextScore();
     this.initTextTurnScore();
     this.initTextTurns();
+    this.initLastWord();
+
+    this.combo = 0;
+    this.getNextLetter = letterGenerator();
 
     // calculate the position where newly played tiles should go
     const entryPoint = this.boardBg.children.at(-1).getBounds();
@@ -267,6 +273,13 @@ export default class Game {
     this.gameElements.width = this.app.view.width;
     this.gameElements.height = this.app.view.height;
     this.addChild(this.gameElements);
+  }
+
+  public initLastWord() {
+    this.text.lastWord = new Text('');
+    this.text.lastWord.x = this.text.score.x;
+    this.text.lastWord.y = this.text.turns.y;
+    this.gameElements.addChild(this.text.lastWord);
   }
 
   public initTextScore() {
@@ -429,6 +442,9 @@ export default class Game {
 
       // update combo
       this.combo++;
+
+      // update last word scored
+      this.text.lastWord.text = word.toUpperCase();
 
       // word stats
       handleWordLength(word.length);
