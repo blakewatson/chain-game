@@ -106,6 +106,7 @@ export default class SceneMenu extends Container {
 
   public initHelpButton() {
     this.helpButton = new Button({
+      game: this.game,
       label: 'How to play',
       clickEventName: HELP_CLICK
     });
@@ -118,6 +119,7 @@ export default class SceneMenu extends Container {
 
   public initPlayButton() {
     this.playButton = new Button({
+      game: this.game,
       label: 'Play',
       clickEventName: PLAY_CLICK
     });
@@ -130,6 +132,7 @@ export default class SceneMenu extends Container {
 
   public initStatsButton() {
     this.statsButton = new Button({
+      game: this.game,
       label: 'Stats',
       clickEventName: STATS_CLICK
     });

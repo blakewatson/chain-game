@@ -1,3 +1,4 @@
+import { Sound } from '@pixi/sound';
 import { Container, Graphics, TextStyle, utils } from 'pixi.js';
 import PubSub from 'pubsub-js';
 import {
@@ -8,11 +9,13 @@ import {
   COLOR_BUTTON_TEXT,
   SHADOW_Y
 } from './constants';
+import Game from './Game';
 import Text from './Text';
 import { linearGradient } from './utils';
 
 interface IButtonOptions {
   label: string;
+  game: Game;
   x?: number;
   y?: number;
   fontSize?: number;
@@ -21,6 +24,7 @@ interface IButtonOptions {
   paddingX?: number;
   paddingY?: number;
   corner?: number;
+  onClick?: Function;
   clickable?: boolean;
   clickEventName?: string;
 }
@@ -33,9 +37,11 @@ export default class Button extends Container {
   public corner = 12;
   public fontSize = 32;
   public label: string = '';
+  public onClick: Function | null = null;
   public paddingX: number = 60;
   public paddingY: number = 20;
   public shadow: Graphics | null = null;
+  public sound: Sound | null = null;
   public text: Text | null = null;
   public textStyle: Partial<TextStyle> = {};
 
@@ -49,6 +55,9 @@ export default class Button extends Container {
     this.x = options.x || 0;
     this.y = options.y || 0;
     this.corner = options.corner || this.corner;
+
+    // save the default sound effect
+    this.sound = options.game.resources.click.sound;
 
     // create the label
     this.text = this.getText();
@@ -73,6 +82,7 @@ export default class Button extends Container {
 
     // mouse events
     this.clickEventName = options.clickEventName || this.clickEventName;
+    this.onClick = options.onClick || null; // optional onClick callback
     this.setClickable(
       options.clickable === undefined ? true : options.clickable
     );
@@ -147,7 +157,15 @@ export default class Button extends Container {
     this.addListener('pointerover', () => this.onHover());
     this.addListener('pointerout', () => this.applyBackground());
     this.addListener('click', () => {
-      PubSub.publish(this.clickEventName, this);
+      if (this.clickEventName) {
+        PubSub.publish(this.clickEventName, this);
+      }
+
+      if (this.onClick) {
+        this.onClick();
+      }
+
+      this.sound.play();
     });
   }
 

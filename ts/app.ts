@@ -1,7 +1,10 @@
+import { sound } from '@pixi/sound';
 import { Dict } from '@pixi/utils';
 import { Loader, LoaderResource, Ticker } from 'pixi.js';
 import Game from './Game';
 import { loadStats } from './stats';
+
+const referenceToTheSoundPluginSoTypescriptWillImportIt = sound;
 
 const fontFace = new FontFace(
   'Ships Whistle',
@@ -20,6 +23,10 @@ const loader = Loader.shared;
 
 loader.add('help_1', 'images/help_1.png');
 loader.add('help_2', 'images/help_2.png');
+
+loader.add('click', 'sound/click-1.wav');
+loader.add('pop', 'sound/pop-4.mp3');
+loader.add('score', 'sound/score-1.mp3');
 
 loader.load(async (loader, resources) => {
   await Promise.all([fontFacePromise, wordListPromise]);

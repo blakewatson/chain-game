@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@pixi/sound": "^4.2.0",
     "animejs": "^3.2.1",
     "esbuild": "^0.14.48",
     "pixi.js": "^6.4.2",

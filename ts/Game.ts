@@ -155,7 +155,7 @@ export default class Game {
   }
 
   public async endGame() {
-    const done = this.preventClicksRequest();
+    this.gameElements.interactiveChildren = false;
 
     for (let i = 0; i < this.board.length - 2; i++) {
       await this.checkForWord(i);
@@ -170,9 +170,7 @@ export default class Game {
     this.sceneMenu.updateFinalScore(this.score);
 
     // fade in end scene
-    this.sceneMenu.fadeIn().finished.then(() => {
-      done();
-    });
+    this.sceneMenu.fadeIn();
 
     // final score stats
     handleScore(this.score);
@@ -194,6 +192,7 @@ export default class Game {
 
     letters.map((letter, i) => {
       const tile = new Tile({
+        game: this,
         letter,
         x: TILE_W * 1.5 * i,
         y: 0
@@ -229,6 +228,7 @@ export default class Game {
       this.resetGame();
     }
 
+    this.gameElements.interactiveChildren = true;
     this.initBoardBg();
 
     if (animateIn) {
@@ -371,6 +371,7 @@ export default class Game {
       });
 
       const newTile = new Tile({
+        game: this,
         letter: this.getNextLetter(),
         x: currentPosition.x,
         y: currentPosition.y,
@@ -415,6 +416,9 @@ export default class Game {
       // const done = this.preventClicksRequest();
       const successAnimations = tiles.map((tile) => tile.animationSuccess());
       Promise.all(successAnimations).then(() => resolve(true));
+
+      // play a sound
+      this.resources.score.sound.play();
 
       // calculate word score
       let score = word

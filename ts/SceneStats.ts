@@ -32,16 +32,15 @@ export default class SceneStats extends Container {
     this.alpha = 0;
 
     this.doneButton = new Button({
+      game: this.game,
       label: 'Done',
-      clickable: false
+      onClick: () => {
+        this.hideStats();
+      }
     });
 
     this.doneButton.x = VIEW_W / 2 - this.doneButton.width / 2;
     this.doneButton.y = VIEW_H - this.doneButton.height - 20;
-
-    this.doneButton.addListener('click', () => {
-      this.hideStats();
-    });
 
     this.addChild(this.stats);
     this.addChild(this.doneButton);

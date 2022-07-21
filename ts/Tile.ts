@@ -14,10 +14,12 @@ import {
   TILE_H,
   TILE_W
 } from './constants';
+import Game from './Game';
 import Text from './Text';
 import { rgbFunctionToHex } from './utils';
 
 export interface ITileOptions {
+  game: Game;
   letter: string;
   x: number;
   y: number;
@@ -33,6 +35,7 @@ export default class Tile extends Button {
 
   public constructor(options: ITileOptions) {
     super({
+      game: options.game,
       label: options.letter.toUpperCase(),
       x: options.x,
       y: options.y,
@@ -43,6 +46,9 @@ export default class Tile extends Button {
       clickable: options.clickable,
       clickEventName: TILE_CLICK
     });
+
+    // override default sound effect
+    this.sound = options.game.resources.pop.sound;
 
     this.lastYPosition = options.y;
     this.letter = options.letter;
