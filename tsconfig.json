@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
-    "lib": ["ESNext", "DOM"]
+    "lib": ["ESNext", "DOM"],
+    "target": "ESNext",
+    "isolatedModules": true,
+    "moduleResolution": "node"
   },
   "include": ["ts/*.ts"]
 }

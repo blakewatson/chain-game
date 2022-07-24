@@ -1,6 +1,7 @@
 import { sound } from '@pixi/sound';
 import { Dict } from '@pixi/utils';
 import { Loader, LoaderResource, Ticker } from 'pixi.js';
+import seedrandom from 'seedrandom';
 import Game from './Game';
 import { loadStats } from './stats';
 
@@ -35,10 +36,13 @@ loader.load(async (loader, resources) => {
 
 function main(resources: Dict<LoaderResource>) {
   const ticker = Ticker.shared;
-  ticker.autoStart = false;
-  ticker.stop();
+
   loadStats();
-  new Game(ticker, resources);
+
+  const seed = new Date().toDateString();
+  const rng = seedrandom(seed);
+
+  new Game(ticker, resources, rng);
 }
 
 async function getWordList() {

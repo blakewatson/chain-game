@@ -24,19 +24,21 @@ import {
   VIEW_H,
   VIEW_W
 } from './constants';
+import SceneEnd from './SceneEnd';
+import SceneGlobalStats from './SceneGlobalStats';
 import SceneMenu from './SceneMenu';
-import SceneStats from './SceneStats';
 import {
-  handleComboStreak,
-  handleScore,
-  handleTurnScore,
-  handleWordLength
+  gameStats,
+  statsComboStreak,
+  statsScore,
+  statsTurnScore,
+  statsWordLength
 } from './stats';
 import Text from './Text';
 import Tile from './Tile';
 import Title from './Title';
 import TurnScore from './TurnScore';
-import { getRandomLetter, letterGenerator } from './utils';
+import { letterGenerator } from './utils';
 
 interface ITextElements {
   lastWord: Text | null;
@@ -52,13 +54,15 @@ export default class Game {
   public boardBg: Container | null = null;
   public combo = 0;
   public gameElements: Container | null = null;
-  public getNextLetter = letterGenerator();
+  public getNextLetter: (() => string) | null = null;
   public h: number = VIEW_H;
   public helpSlide: Container = new Container();
   public preventClicksPromises: Promise<any>[] = [];
   public resources: Dict<LoaderResource> | null = null;
-  public sceneMenu: SceneMenu = new SceneMenu();
-  public sceneStats: SceneStats = new SceneStats();
+  public rng: (() => number) | null = null;
+  public sceneEnd = new SceneEnd();
+  public sceneMenu = new SceneMenu();
+  public sceneGlobalStats = new SceneGlobalStats();
   public score = 0;
   public ticker: Ticker | null = null;
   public tileEntryPoint: { x: number; y: number } = { x: 0, y: 0 };
@@ -74,7 +78,11 @@ export default class Game {
     turns: null
   };
 
-  constructor(ticker: Ticker, resources: Dict<LoaderResource>) {
+  constructor(
+    ticker: Ticker,
+    resources: Dict<LoaderResource>,
+    rng: () => number = Math.random
+  ) {
     this.app = new Application({
       width: VIEW_W,
       height: VIEW_H,
@@ -84,6 +92,7 @@ export default class Game {
 
     this.ticker = ticker;
     this.resources = resources;
+    this.rng = rng;
 
     document.querySelector('#app')?.append(this.app.view);
 
@@ -93,10 +102,13 @@ export default class Game {
     this.sceneMenu.init(this);
     this.addChild(this.sceneMenu);
 
+    this.sceneEnd.init(this);
+    this.addChild(this.sceneEnd);
+
     this.addChild(this.helpSlide);
 
-    this.sceneStats.init(this);
-    this.addChild(this.sceneStats);
+    this.sceneGlobalStats.init(this);
+    this.addChild(this.sceneGlobalStats);
 
     this.initGameElements();
 
@@ -106,6 +118,16 @@ export default class Game {
     this.ticker.start();
 
     this.wordList = JSON.parse(localStorage.getItem('chain-wordlist'));
+
+    // if today's game has already been played, fade in game stats
+    if (gameStats.played) {
+      this.sceneMenu.alpha = 0; // hide immediately
+      this.sceneMenu.setClickable(false); // prevent clicks
+      // this.sceneEnd.updateFinalScore(gameStats.score);
+      this.title.moveUp();
+      this.sceneEnd.fadeIn();
+      this.sceneEnd.showStats();
+    }
   }
 
   public addChild(...children: DisplayObject[]) {
@@ -167,13 +189,12 @@ export default class Game {
     await this.animationGameEnter.finished;
     this.animationGameEnter.reverse();
 
-    this.sceneMenu.updateFinalScore(this.score);
+    // final score stats
+    statsScore(this.score);
 
     // fade in end scene
-    this.sceneMenu.fadeIn();
-
-    // final score stats
-    handleScore(this.score);
+    this.sceneEnd.showStats();
+    this.sceneEnd.fadeIn();
   }
 
   public initBank() {
@@ -182,12 +203,7 @@ export default class Game {
     let letters: string[] = [];
 
     for (let i = 0; i < 5; i++) {
-      if (i === 0) {
-        letters.push(getRandomLetter(true));
-        continue;
-      }
-
-      letters.push(getRandomLetter());
+      letters.push(this.getNextLetter());
     }
 
     letters.map((letter, i) => {
@@ -235,6 +251,8 @@ export default class Game {
       this.gameElements.alpha = 0;
     }
 
+    this.getNextLetter = letterGenerator(this.rng);
+
     this.initBank();
     this.initTextScore();
     this.initTextTurnScore();
@@ -242,7 +260,6 @@ export default class Game {
     this.initLastWord();
 
     this.combo = 0;
-    this.getNextLetter = letterGenerator();
 
     // calculate the position where newly played tiles should go
     const entryPoint = this.boardBg.children.at(-1).getBounds();
@@ -451,14 +468,14 @@ export default class Game {
       this.text.lastWord.text = word.toUpperCase();
 
       // word stats
-      handleWordLength(word.length);
+      statsWordLength(word.length);
 
       // turn score stats
-      handleTurnScore(score);
+      statsTurnScore(score);
 
       // combo stats... minus 1 because this.combo represents number of consecutive
       // words and 1 word does not actually constitute a combo
-      handleComboStreak(this.combo - 1);
+      statsComboStreak(this.combo - 1);
     });
   }
 

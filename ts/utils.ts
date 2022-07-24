@@ -52,7 +52,7 @@ export const linearGradient = (options: IGradientOptions) => {
   return Texture.from(c);
 };
 
-export const letterGenerator = () => {
+export const letterGenerator = (rng: () => number) => {
   const initialLetters =
     'aaaaaaaaabbccddddeeeeeeeeeeeefggghiiiiiiiiijkllllmmnnnnnnooooooooppqrrrrrrssssttttttuuuuvwxyz';
   let letters = initialLetters.split('');
@@ -62,7 +62,7 @@ export const letterGenerator = () => {
       letters = initialLetters.split('');
     }
 
-    const i = Math.floor(Math.random() * letters.length);
+    const i = Math.floor(rng() * letters.length);
 
     const result = letters[i];
     letters.splice(i, 1);

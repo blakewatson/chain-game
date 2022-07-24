@@ -26,33 +26,33 @@ export default class SceneMenu extends Container {
   }
 
   public fadeIn() {
-    const anim = this.fadeOut(false);
-    anim.seek(150);
-    anim.reverse();
-    anim.play();
-
-    anim.finished.then(() => {
-      this.playButton.setClickable(true);
-      this.helpButton.setClickable(true);
-      this.statsButton.setClickable(true);
-    });
-
-    return anim;
-  }
-
-  public fadeOut(autoplay = true) {
-    this.playButton.setClickable(false);
-    this.helpButton.setClickable(false);
-    this.statsButton.setClickable(false);
+    this.setClickable(true);
 
     return anime({
       targets: {
-        alpha: 1
+        alpha: this.alpha
+      },
+      alpha: 1,
+      duration: 150,
+      easing: 'linear',
+
+      update: (anim) => {
+        const obj = anim.animatables[0].target as any;
+        this.alpha = obj.alpha;
+      }
+    });
+  }
+
+  public fadeOut() {
+    this.setClickable(false);
+
+    return anime({
+      targets: {
+        alpha: this.alpha
       },
       alpha: 0,
       duration: 150,
       easing: 'linear',
-      autoplay,
 
       update: (anim) => {
         const obj = anim.animatables[0].target as any;
@@ -96,14 +96,6 @@ export default class SceneMenu extends Container {
     this.addChild(this.credits);
   }
 
-  public initFinalScore(score: number) {
-    this.finalScore = new Text(`Final Score: ${score}`);
-    this.finalScore.anchor.set(0.5);
-    this.finalScore.x = VIEW_W / 2;
-    this.finalScore.y = VIEW_H / 2 - 110;
-    this.addChild(this.finalScore);
-  }
-
   public initHelpButton() {
     this.helpButton = new Button({
       game: this.game,
@@ -145,10 +137,6 @@ export default class SceneMenu extends Container {
 
   public listenForHelpClick() {
     PubSub.subscribe(HELP_CLICK, () => {
-      this.playButton.setClickable(false);
-      this.helpButton.setClickable(false);
-      this.statsButton.setClickable(false);
-
       // fade out menu buttons and move title
       this.game.title.moveUp();
 
@@ -160,9 +148,6 @@ export default class SceneMenu extends Container {
 
   public listenForPlayClick() {
     PubSub.subscribe(PLAY_CLICK, () => {
-      this.playButton.setClickable(false);
-      this.helpButton.setClickable(false);
-      this.statsButton.setClickable(false);
       this.game.initGame(true);
 
       this.game.title.moveUp();
@@ -176,25 +161,19 @@ export default class SceneMenu extends Container {
 
   public listenForStatsClick() {
     PubSub.subscribe(STATS_CLICK, () => {
-      this.playButton.setClickable(false);
-      this.helpButton.setClickable(false);
-      this.statsButton.setClickable(false);
-
       this.game.title.moveUp();
 
       this.fadeOut().finished.then(() => {
         // show stats
-        this.game.sceneStats.showStats();
+        this.game.sceneGlobalStats.showStats();
+        this.game.sceneGlobalStats.fadeIn();
       });
     });
   }
 
-  public updateFinalScore(score: number) {
-    if (!this.finalScore) {
-      this.initFinalScore(score);
-      return;
-    }
-
-    this.finalScore.text = `Final Score: ${score}`;
+  public setClickable(clickable: boolean) {
+    this.playButton.setClickable(clickable);
+    this.helpButton.setClickable(clickable);
+    this.statsButton.setClickable(clickable);
   }
 }

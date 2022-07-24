@@ -1,4 +1,5 @@
-export interface IStats {
+export interface IGlobalStats {
+  avgNumberWords: number;
   avgScore: number;
   avgWordLength: number;
   highestComboStreak: number;
@@ -8,7 +9,18 @@ export interface IStats {
   numberWords: number;
 }
 
-export let stats: IStats = {
+export interface IGameStats {
+  avgWordLength: number;
+  date: string;
+  highestComboStreak: number;
+  highestTurnScore: number;
+  numberWords: number;
+  played: boolean;
+  score: number;
+}
+
+export let globalStats: IGlobalStats = {
+  avgNumberWords: 0,
   avgScore: 0,
   avgWordLength: 0,
   highestComboStreak: 0,
@@ -18,42 +30,78 @@ export let stats: IStats = {
   numberWords: 0
 };
 
-export const loadStats = () => {
-  const data = localStorage.getItem('chain-stats');
+export let gameStats: IGameStats = {
+  avgWordLength: 0,
+  date: new Date().toDateString(),
+  highestComboStreak: 0,
+  highestTurnScore: 0,
+  numberWords: 0,
+  played: false,
+  score: 0
+};
 
-  if (!data) {
-    return;
+export const loadStats = () => {
+  const globalData = localStorage.getItem('chain-global-stats');
+  const gameData = localStorage.getItem('chain-game-stats');
+
+  if (globalData) {
+    globalStats = JSON.parse(globalData);
   }
 
-  stats = JSON.parse(data);
+  if (gameData) {
+    const tmp = JSON.parse(gameData);
+    gameStats = tmp.date === new Date().toDateString() ? tmp : gameStats;
+  }
 };
 
 export const saveStats = () => {
-  localStorage.setItem('chain-stats', JSON.stringify(stats));
+  localStorage.setItem('chain-global-stats', JSON.stringify(globalStats));
+  localStorage.setItem('chain-game-stats', JSON.stringify(gameStats));
 };
 
-export const handleWordLength = (wordLength: number) => {
-  stats.avgWordLength =
-    (stats.avgWordLength * stats.numberWords + wordLength) /
-    (stats.numberWords + 1);
+export const statsWordLength = (wordLength: number) => {
+  globalStats.avgWordLength =
+    (globalStats.avgWordLength * globalStats.numberWords + wordLength) /
+    (globalStats.numberWords + 1);
 
-  stats.numberWords++;
+  gameStats.avgWordLength =
+    (gameStats.avgWordLength * gameStats.numberWords + wordLength) /
+    (gameStats.numberWords + 1);
+
+  globalStats.numberWords++;
+  gameStats.numberWords++;
 };
 
-export const handleComboStreak = (combos: number) => {
-  stats.highestComboStreak = Math.max(stats.highestComboStreak, combos);
+export const statsComboStreak = (combos: number) => {
+  globalStats.highestComboStreak = Math.max(
+    globalStats.highestComboStreak,
+    combos
+  );
+
+  gameStats.highestComboStreak = Math.max(gameStats.highestComboStreak, combos);
 };
 
-export const handleScore = (score) => {
-  stats.avgScore =
-    (stats.avgScore * stats.numberPlayed + score) / (stats.numberPlayed + 1);
+export const statsScore = (score) => {
+  globalStats.avgScore =
+    (globalStats.avgScore * globalStats.numberPlayed + score) /
+    (globalStats.numberPlayed + 1);
 
-  stats.numberPlayed++;
-  stats.highScore = Math.max(stats.highScore, score);
+  // calculate average number of words per game
+  globalStats.avgNumberWords =
+    (globalStats.avgNumberWords * globalStats.numberPlayed +
+      gameStats.numberWords) /
+    (globalStats.numberPlayed + 1);
+
+  globalStats.numberPlayed++;
+  globalStats.highScore = Math.max(globalStats.highScore, score);
+
+  gameStats.score = score;
+  gameStats.played = true;
 
   saveStats();
 };
 
-export const handleTurnScore = (score) => {
-  stats.highestTurnScore = Math.max(stats.highestTurnScore, score);
+export const statsTurnScore = (score) => {
+  globalStats.highestTurnScore = Math.max(globalStats.highestTurnScore, score);
+  gameStats.highestTurnScore = Math.max(gameStats.highestTurnScore, score);
 };

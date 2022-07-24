@@ -192,17 +192,18 @@ export default class Button extends Container {
   }
 
   public setClickable(value: boolean) {
-    this.interactive = value;
-    this.buttonMode = value;
+    this.removeAllListeners('pointerover');
+    this.removeAllListeners('pointerout');
+    this.removeAllListeners('click');
 
     if (!value) {
       this.applyBackground();
-      this.removeAllListeners('pointerover');
-      this.removeAllListeners('pointerout');
-      this.removeAllListeners('click');
     } else {
       this.initListeners();
     }
+
+    this.interactive = value;
+    this.buttonMode = value;
   }
 
   public updateLabel(text: string) {
