@@ -11,6 +11,7 @@ import {
   utils
 } from 'pixi.js';
 import PubSub from 'pubsub-js';
+import seedrandom from 'seedrandom';
 import {
   COLOR_BG,
   COLOR_SLOT,
@@ -38,7 +39,7 @@ import {
   statsTurnScore,
   statsWordLength
 } from './stats';
-import { letterGenerator } from './utils';
+import { letterPreGen } from './utils';
 
 interface ITextElements {
   lastWord: Text | null;
@@ -54,9 +55,9 @@ export default class Game {
   public boardBg: Container | null = null;
   public combo = 0;
   public gameElements: Container | null = null;
-  public getNextLetter: (() => string) | null = null;
   public h: number = VIEW_H;
   public helpSlide: Container = new Container();
+  public letters: string[] = [];
   public preventClicksPromises: Promise<any>[] = [];
   public resources: Dict<LoaderResource> | null = null;
   public rng: (() => number) | null = null;
@@ -78,11 +79,7 @@ export default class Game {
     turns: null
   };
 
-  constructor(
-    ticker: Ticker,
-    resources: Dict<LoaderResource>,
-    rng: () => number = Math.random
-  ) {
+  constructor(ticker: Ticker, resources: Dict<LoaderResource>) {
     this.app = new Application({
       width: VIEW_W,
       height: VIEW_H,
@@ -92,7 +89,6 @@ export default class Game {
 
     this.ticker = ticker;
     this.resources = resources;
-    this.rng = rng;
 
     document.querySelector('#app')?.append(this.app.view);
 
@@ -197,8 +193,13 @@ export default class Game {
     this.sceneEnd.fadeIn();
   }
 
+  public getNextLetter() {
+    return this.letters.shift();
+  }
+
   public initBank() {
     this.bank = new Container();
+    this.letters = letterPreGen(this.rng);
 
     let letters: string[] = [];
 
@@ -239,20 +240,16 @@ export default class Game {
     this.boardBg.y = VIEW_H / 2 - TILE_H;
   }
 
-  public initGame(animateIn: boolean = false) {
-    if (this.turns === 0) {
-      this.resetGame();
-    }
+  public initGame(animateIn: boolean = true) {
+    this.resetGame();
 
     this.gameElements.interactiveChildren = true;
-    this.initBoardBg();
 
     if (animateIn) {
       this.gameElements.alpha = 0;
     }
 
-    this.getNextLetter = letterGenerator(this.rng);
-
+    this.initBoardBg();
     this.initBank();
     this.initTextScore();
     this.initTextTurnScore();
@@ -424,6 +421,8 @@ export default class Game {
 
     this.turns = INITIAL_TURNS;
     this.score = 0;
+
+    this.rng = seedrandom(new Date().toDateString());
   }
 
   public scoreWord(word: string, start: number = 0) {

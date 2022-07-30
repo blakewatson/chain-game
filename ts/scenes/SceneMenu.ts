@@ -153,7 +153,7 @@ export default class SceneMenu extends Container {
 
   public listenForPlayClick() {
     PubSub.subscribe(PLAY_CLICK, () => {
-      this.game.initGame(true);
+      this.game.initGame();
 
       this.game.title.moveUp();
 

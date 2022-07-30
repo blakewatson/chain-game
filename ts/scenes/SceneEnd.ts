@@ -58,7 +58,10 @@ export default class SceneEnd extends SceneStatsBase {
       update: (anim) => {
         const obj = anim.animatables[0].target as any;
         this.alpha = obj.alpha;
-        this.game.ticker.add(this.updateCountdown.bind(this));
+      },
+
+      complete: () => {
+        this.game.ticker.add(this.updateCountdown, this);
       }
     });
   }
@@ -122,8 +125,6 @@ export default class SceneEnd extends SceneStatsBase {
     this.countdownText.x = VIEW_W / 2 - this.countdownText.width / 2;
 
     this.addChild(this.countdownText);
-
-    this.game.ticker.add(this.updateCountdown.bind(this));
   }
 
   public initShareButton() {
@@ -163,6 +164,12 @@ export default class SceneEnd extends SceneStatsBase {
     const hours = Math.floor(timeRemaining / 1000 / 60 / 60);
     const minutes = Math.floor((timeRemaining / 1000 / 60) % 60);
     const seconds = Math.floor((timeRemaining / 1000) % 60);
+
+    if (hours < 0) {
+      this.game.ticker.remove(this.updateCountdown, this);
+      this.fadeOut().finished.then(() => this.game.initGame());
+      return;
+    }
 
     this.countdownText.text = `Next Chain: ${hours
       .toString()

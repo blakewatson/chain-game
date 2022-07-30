@@ -1,4 +1,5 @@
 import { Texture, utils } from 'pixi.js';
+import { INITIAL_TURNS } from './constants';
 
 export const getRandomLetter = (vowelsOnly = false) => {
   const alpha: string[] = [];
@@ -71,8 +72,69 @@ export const letterGenerator = (rng: () => number) => {
   };
 };
 
-export const isVowel = (letter: string) =>
-  'aeiou'.split('').includes(letter.toLowerCase());
+export const letterIsVowel = (letter: string) =>
+  ['a', 'e', 'i', 'o', 'u', 'y'].includes(letter);
+
+export const letterPreGen = (
+  rng: () => number,
+  numOfLetters: number = INITIAL_TURNS + 5
+) => {
+  const getLetter = letterGenerator(rng);
+  const letters: string[] = [];
+  const weightAmt = 0.2;
+
+  let oddsWipeCons = 0;
+  let oddsWipeVowel = 0;
+
+  const wipeLetter = (letter: string) => {
+    const val = rng();
+
+    console.log(
+      'val',
+      val,
+      'letter',
+      letter,
+      'oddsWipeVowel',
+      oddsWipeVowel,
+      'oddsWipeCons',
+      oddsWipeCons
+    );
+
+    if (letterIsVowel(letter) && val < oddsWipeVowel) {
+      return true;
+    }
+
+    if (!letterIsVowel(letter) && val < oddsWipeCons) {
+      return true;
+    }
+
+    return false;
+  };
+
+  for (let i = 0; i < numOfLetters; i++) {
+    let letter = getLetter();
+
+    if (wipeLetter(letter)) {
+      console.log('wiping letter', letter);
+      i--;
+      continue;
+    }
+
+    if (letterIsVowel(letter)) {
+      oddsWipeCons = Math.max(oddsWipeCons - weightAmt, 0);
+      oddsWipeVowel += weightAmt;
+    } else {
+      oddsWipeCons += weightAmt;
+      oddsWipeVowel = Math.max(oddsWipeVowel - weightAmt, 0);
+    }
+
+    console.log('pushing letter', letter);
+    letters.push(letter);
+  }
+
+  console.log(letters.join());
+  return letters;
+};
 
 export function rgbFunctionToHex(rgba: string): string;
 export function rgbFunctionToHex(rgba: string, asNumber: true): number;

@@ -26,6 +26,8 @@ export default class SceneStatsBase extends Container {
     statsDisplay: Map<keyof IGlobalStats | keyof IGameStats, string>,
     stats: IGlobalStats | IGameStats
   ) {
+    this.stats.removeChildren();
+
     Array.from(statsDisplay.entries()).forEach(([key, label], idx: number) => {
       const name = new Text(label, {
         align: 'left'
