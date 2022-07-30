@@ -1,9 +1,9 @@
 import anime from 'animejs';
-import Button from './Button';
-import { VIEW_H, VIEW_W } from './constants';
-import Game from './Game';
+import { VIEW_H, VIEW_W } from '../constants';
+import Button from '../elements/Button';
+import Game from '../Game';
+import { gameStats, globalStats, IGlobalStats } from '../stats';
 import SceneStatsBase from './SceneStatsBase';
-import { gameStats, globalStats, IGlobalStats } from './stats';
 
 export const globalStatsDisplay = new Map<keyof IGlobalStats, string>([
   ['numberPlayed', 'Games played'],
@@ -44,6 +44,7 @@ export default class SceneStats extends SceneStatsBase {
   }
 
   public fadeIn() {
+    this.visible = true;
     this.doneButton.setClickable(true);
 
     return anime({
@@ -75,6 +76,10 @@ export default class SceneStats extends SceneStatsBase {
       update: (anim) => {
         const obj = anim.animatables[0].target as any;
         this.alpha = obj.alpha;
+      },
+
+      complete: (anim) => {
+        this.visible = false;
       }
     });
   }

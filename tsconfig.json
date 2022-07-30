@@ -6,5 +6,5 @@
     "isolatedModules": true,
     "moduleResolution": "node"
   },
-  "include": ["ts/*.ts"]
+  "include": ["ts/**/*.ts"]
 }

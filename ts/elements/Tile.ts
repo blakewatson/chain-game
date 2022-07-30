@@ -1,6 +1,5 @@
 import anime from 'animejs';
 import { IPoint } from 'pixi.js';
-import Button from './Button';
 import {
   COLOR_BUTTON_GRADIENT_BOTTOM,
   COLOR_BUTTON_GRADIENT_TOP,
@@ -13,10 +12,11 @@ import {
   TILE_CLICK,
   TILE_H,
   TILE_W
-} from './constants';
-import Game from './Game';
+} from '../constants';
+import Game from '../Game';
+import { rgbFunctionToHex } from '../utils';
+import Button from './Button';
 import Text from './Text';
-import { rgbFunctionToHex } from './utils';
 
 export interface ITileOptions {
   game: Game;

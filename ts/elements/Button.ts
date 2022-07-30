@@ -8,10 +8,10 @@ import {
   COLOR_BUTTON_HOVER_GRADIENT_TOP,
   COLOR_BUTTON_TEXT,
   SHADOW_Y
-} from './constants';
-import Game from './Game';
+} from '../constants';
+import Game from '../Game';
+import { linearGradient } from '../utils';
 import Text from './Text';
-import { linearGradient } from './utils';
 
 interface IButtonOptions {
   label: string;

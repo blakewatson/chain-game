@@ -1,5 +1,5 @@
 import anime, { AnimeTimelineInstance } from 'animejs';
-import { COLOR_TEXT_TURN_SCORE } from './constants';
+import { COLOR_TEXT_TURN_SCORE } from '../constants';
 import Text from './Text';
 
 export default class TurnScore extends Text {

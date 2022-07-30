@@ -1,6 +1,6 @@
 import anime, { AnimeInstance, AnimeParams } from 'animejs';
 import { Text as PixiText, TextStyle } from 'pixi.js';
-import { COLOR_TEXT } from './constants';
+import { COLOR_TEXT } from '../constants';
 
 export default class Text extends PixiText {
   public currentAnimation: AnimeInstance | null = null;

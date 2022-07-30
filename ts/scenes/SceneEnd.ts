@@ -1,11 +1,11 @@
 import anime from 'animejs';
 import { Container } from 'pixi.js';
-import Button from './Button';
-import { VIEW_W } from './constants';
-import Game from './Game';
+import { VIEW_W } from '../constants';
+import Button from '../elements/Button';
+import Text from '../elements/Text';
+import Game from '../Game';
+import { gameStats, IGameStats } from '../stats';
 import SceneStatsBase from './SceneStatsBase';
-import { gameStats, IGameStats } from './stats';
-import Text from './Text';
 
 export const gameStatsDisplay = new Map<keyof IGameStats, string>([
   ['score', '✨ Final score'],
@@ -43,6 +43,7 @@ export default class SceneEnd extends SceneStatsBase {
   }
 
   public fadeIn() {
+    this.visible = true;
     this.allStatsButton.setClickable(true);
     this.shareButton.setClickable(true);
 
@@ -57,6 +58,7 @@ export default class SceneEnd extends SceneStatsBase {
       update: (anim) => {
         const obj = anim.animatables[0].target as any;
         this.alpha = obj.alpha;
+        this.game.ticker.add(this.updateCountdown.bind(this));
       }
     });
   }
@@ -76,6 +78,11 @@ export default class SceneEnd extends SceneStatsBase {
       update: (anim) => {
         const obj = anim.animatables[0].target as any;
         this.alpha = obj.alpha;
+      },
+
+      complete: (anim) => {
+        this.visible = false;
+        this.game.ticker.remove(this.updateCountdown.bind(this));
       }
     });
   }
@@ -116,23 +123,7 @@ export default class SceneEnd extends SceneStatsBase {
 
     this.addChild(this.countdownText);
 
-    this.game.ticker.add((dt) => {
-      const midnight = new Date();
-      midnight.setDate(midnight.getDate() + 1);
-      midnight.setHours(0, 0, 0, 0);
-
-      const timeRemaining = midnight.getTime() - Date.now();
-
-      const hours = Math.floor(timeRemaining / 1000 / 60 / 60);
-      const minutes = Math.floor((timeRemaining / 1000 / 60) % 60);
-      const seconds = Math.floor((timeRemaining / 1000) % 60);
-
-      this.countdownText.text = `Next Chain: ${hours
-        .toString()
-        .padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds
-        .toString()
-        .padStart(2, '0')}`;
-    });
+    this.game.ticker.add(this.updateCountdown.bind(this));
   }
 
   public initShareButton() {
@@ -160,5 +151,23 @@ export default class SceneEnd extends SceneStatsBase {
     super.showStats(gameStatsDisplay, gameStats);
     this.buttonGroup.y = this.stats.children[0].y + this.stats.height + 30;
     this.countdownText.y = this.buttonGroup.y + this.buttonGroup.height + 30;
+  }
+
+  public updateCountdown(dt: number) {
+    const midnight = new Date();
+    midnight.setDate(midnight.getDate() + 1);
+    midnight.setHours(0, 0, 0, 0);
+
+    const timeRemaining = midnight.getTime() - Date.now();
+
+    const hours = Math.floor(timeRemaining / 1000 / 60 / 60);
+    const minutes = Math.floor((timeRemaining / 1000 / 60) % 60);
+    const seconds = Math.floor((timeRemaining / 1000) % 60);
+
+    this.countdownText.text = `Next Chain: ${hours
+      .toString()
+      .padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds
+      .toString()
+      .padStart(2, '0')}`;
   }
 }

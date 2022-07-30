@@ -24,9 +24,13 @@ import {
   VIEW_H,
   VIEW_W
 } from './constants';
-import SceneEnd from './SceneEnd';
-import SceneGlobalStats from './SceneGlobalStats';
-import SceneMenu from './SceneMenu';
+import Text from './elements/Text';
+import Tile from './elements/Tile';
+import Title from './elements/Title';
+import TurnScore from './elements/TurnScore';
+import SceneEnd from './scenes/SceneEnd';
+import SceneGlobalStats from './scenes/SceneGlobalStats';
+import SceneMenu from './scenes/SceneMenu';
 import {
   gameStats,
   statsComboStreak,
@@ -34,10 +38,6 @@ import {
   statsTurnScore,
   statsWordLength
 } from './stats';
-import Text from './Text';
-import Tile from './Tile';
-import Title from './Title';
-import TurnScore from './TurnScore';
 import { letterGenerator } from './utils';
 
 interface ITextElements {

@@ -1,7 +1,6 @@
 import anime from 'animejs';
 import { Container } from 'pixi.js';
 import PubSub from 'pubsub-js';
-import Button from './Button';
 import {
   COLOR_WHITE,
   HELP_CLICK,
@@ -9,9 +8,10 @@ import {
   STATS_CLICK,
   VIEW_H,
   VIEW_W
-} from './constants';
-import Game from './Game';
-import Text from './Text';
+} from '../constants';
+import Button from '../elements/Button';
+import Text from '../elements/Text';
+import Game from '../Game';
 
 export default class SceneMenu extends Container {
   public credits: Text | null = null;
@@ -26,6 +26,7 @@ export default class SceneMenu extends Container {
   }
 
   public fadeIn() {
+    this.visible = true;
     this.setClickable(true);
 
     return anime({
@@ -57,6 +58,10 @@ export default class SceneMenu extends Container {
       update: (anim) => {
         const obj = anim.animatables[0].target as any;
         this.alpha = obj.alpha;
+      },
+
+      complete: (anim) => {
+        this.visible = false;
       }
     });
   }

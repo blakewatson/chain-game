@@ -1,5 +1,5 @@
 import anime, { AnimeParams } from 'animejs';
-import { COLOR_TITLE, VIEW_W } from './constants';
+import { COLOR_TITLE, VIEW_W } from '../constants';
 import Text from './Text';
 
 export default class Title extends Text {

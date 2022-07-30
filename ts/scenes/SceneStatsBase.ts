@@ -1,8 +1,8 @@
 import { Container, Graphics, utils } from 'pixi.js';
-import { COLOR_TEXT, VIEW_H, VIEW_W } from './constants';
-import Game from './Game';
-import { IGameStats, IGlobalStats } from './stats';
-import Text from './Text';
+import { COLOR_TEXT, VIEW_H, VIEW_W } from '../constants';
+import Text from '../elements/Text';
+import Game from '../Game';
+import { IGameStats, IGlobalStats } from '../stats';
 
 export default class SceneStatsBase extends Container {
   public game: Game | null = null;
@@ -76,10 +76,5 @@ export default class SceneStatsBase extends Container {
 
       this.stats.addChild(dots);
     });
-
-    // this.fadeIn().finished.then(() => {
-    //   this.doneButton.interactive = true;
-    //   this.doneButton.buttonMode = true;
-    // });
   }
 }
