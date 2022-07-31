@@ -55,13 +55,13 @@ export default class SceneEnd extends SceneStatsBase {
       duration: 150,
       easing: 'linear',
 
+      begin: () => {
+        this.game.ticker.add(this.updateCountdown, this);
+      },
+
       update: (anim) => {
         const obj = anim.animatables[0].target as any;
         this.alpha = obj.alpha;
-      },
-
-      complete: () => {
-        this.game.ticker.add(this.updateCountdown, this);
       }
     });
   }

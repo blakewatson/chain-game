@@ -32,8 +32,13 @@ export default class Title extends Text {
     this.y = 100;
   }
 
-  public moveDown() {
+  public moveDown(animate = true) {
     if (this.y === 100) {
+      return;
+    }
+
+    if (!animate) {
+      this.y = 100;
       return;
     }
 
@@ -46,8 +51,13 @@ export default class Title extends Text {
     });
   }
 
-  public moveUp() {
+  public moveUp(animate = true) {
     if (this.y === 50) {
+      return;
+    }
+
+    if (!animate) {
+      this.y = 50;
       return;
     }
 

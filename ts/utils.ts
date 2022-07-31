@@ -89,16 +89,16 @@ export const letterPreGen = (
   const wipeLetter = (letter: string) => {
     const val = rng();
 
-    console.log(
-      'val',
-      val,
-      'letter',
-      letter,
-      'oddsWipeVowel',
-      oddsWipeVowel,
-      'oddsWipeCons',
-      oddsWipeCons
-    );
+    // console.log(
+    //   'val',
+    //   val,
+    //   'letter',
+    //   letter,
+    //   'oddsWipeVowel',
+    //   oddsWipeVowel,
+    //   'oddsWipeCons',
+    //   oddsWipeCons
+    // );
 
     if (letterIsVowel(letter) && val < oddsWipeVowel) {
       return true;
@@ -115,24 +115,24 @@ export const letterPreGen = (
     let letter = getLetter();
 
     if (wipeLetter(letter)) {
-      console.log('wiping letter', letter);
+      //console.log('wiping letter', letter);
       i--;
       continue;
     }
 
     if (letterIsVowel(letter)) {
       oddsWipeCons = Math.max(oddsWipeCons - weightAmt, 0);
-      oddsWipeVowel += weightAmt;
+      oddsWipeVowel = Math.min(oddsWipeVowel + weightAmt, 1);
     } else {
-      oddsWipeCons += weightAmt;
+      oddsWipeCons = Math.min(oddsWipeCons + weightAmt, 1);
       oddsWipeVowel = Math.max(oddsWipeVowel - weightAmt, 0);
     }
 
-    console.log('pushing letter', letter);
+    //console.log('pushing letter', letter);
     letters.push(letter);
   }
 
-  console.log(letters.join());
+  //console.log(letters.join());
   return letters;
 };
 

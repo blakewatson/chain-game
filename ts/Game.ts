@@ -120,7 +120,7 @@ export default class Game {
       this.sceneMenu.alpha = 0; // hide immediately
       this.sceneMenu.setClickable(false); // prevent clicks
       // this.sceneEnd.updateFinalScore(gameStats.score);
-      this.title.moveUp();
+      this.title.moveUp(false);
       this.sceneEnd.fadeIn();
       this.sceneEnd.showStats();
     }
