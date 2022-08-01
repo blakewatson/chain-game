@@ -156,7 +156,8 @@ export default class Game {
 
     this.helpSlide.addChild(helpImg);
 
-    helpImg.addListener('click', () => {
+    const onClick = (val: any) => {
+      helpImg.removeAllListeners();
       this.helpSlide.removeChild(helpImg);
 
       if (screen === 1) {
@@ -169,7 +170,10 @@ export default class Game {
       }
 
       this.sceneMenu.fadeIn();
-    });
+    };
+
+    helpImg.addListener('click', onClick, this);
+    helpImg.addListener('tap', onClick, this);
   }
 
   public async endGame() {

@@ -156,7 +156,8 @@ export default class Button extends Container {
   public initListeners() {
     this.addListener('pointerover', () => this.onHover());
     this.addListener('pointerout', () => this.applyBackground());
-    this.addListener('click', () => {
+
+    const onClick = () => {
       if (this.clickEventName) {
         PubSub.publish(this.clickEventName, this);
       }
@@ -166,7 +167,10 @@ export default class Button extends Container {
       }
 
       this.sound.play();
-    });
+    };
+
+    this.addListener('click', onClick, this);
+    this.addListener('tap', onClick, this);
   }
 
   public onHover() {
@@ -195,6 +199,7 @@ export default class Button extends Container {
     this.removeAllListeners('pointerover');
     this.removeAllListeners('pointerout');
     this.removeAllListeners('click');
+    this.removeAllListeners('tap');
 
     if (!value) {
       this.applyBackground();
