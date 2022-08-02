@@ -42,7 +42,10 @@ function main(resources: Dict<LoaderResource>) {
 }
 
 async function getWordList() {
-  if (localStorage.getItem('chain-wordlist')) {
+  if (
+    localStorage.getItem('chain-wordlist') &&
+    localStorage.getItem('chain-wordlist-is-profanity-filtered')
+  ) {
     return;
   }
 
@@ -64,6 +67,7 @@ async function getWordList() {
     words.sort((a, b) => b.length - a.length);
 
     localStorage.setItem('chain-wordlist', JSON.stringify(words));
+    localStorage.setItem('chain-wordlist-is-profanity-filtered', 1);
   } catch (err) {
     console.error(err);
   }
