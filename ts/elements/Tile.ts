@@ -24,7 +24,6 @@ export interface ITileOptions {
   x: number;
   y: number;
   clickable?: boolean;
-  animateIn?: boolean;
 }
 
 export default class Tile extends Button {
@@ -54,11 +53,6 @@ export default class Tile extends Button {
     this.letter = options.letter;
 
     this.createLetterValue();
-
-    // animate entrance if necessary
-    if (options.animateIn) {
-      this.animationEnter();
-    }
   }
 
   public animationEnter() {

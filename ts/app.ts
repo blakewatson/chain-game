@@ -67,7 +67,7 @@ async function getWordList() {
     words.sort((a, b) => b.length - a.length);
 
     localStorage.setItem('chain-wordlist', JSON.stringify(words));
-    localStorage.setItem('chain-wordlist-is-profanity-filtered', 1);
+    localStorage.setItem('chain-wordlist-is-profanity-filtered', '1');
   } catch (err) {
     console.error(err);
   }

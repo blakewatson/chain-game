@@ -110,9 +110,6 @@ export default class Game {
 
     this.listenForTileClick();
 
-    this.ticker.add(this.update.bind(this));
-    this.ticker.start();
-
     this.wordList = JSON.parse(localStorage.getItem('chain-wordlist'));
 
     // if today's game has already been played, fade in game stats
@@ -392,11 +389,11 @@ export default class Game {
         game: this,
         letter: this.getNextLetter(),
         x: currentPosition.x,
-        y: currentPosition.y,
-        animateIn: true
+        y: currentPosition.y
       });
 
       this.bank.addChild(newTile);
+      newTile.animationEnter();
     });
   }
 
@@ -481,6 +478,4 @@ export default class Game {
       statsComboStreak(this.combo - 1);
     });
   }
-
-  public update(dt: number) {}
 }

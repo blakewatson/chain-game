@@ -27,6 +27,7 @@ export default class SceneStats extends SceneStatsBase {
   public init(game: Game) {
     this.game = game;
     this.alpha = 0;
+    this.visible = false;
 
     this.doneButton = new Button({
       game: this.game,
