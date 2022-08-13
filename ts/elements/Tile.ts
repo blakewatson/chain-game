@@ -1,12 +1,7 @@
 import anime from 'animejs';
 import { IPoint } from 'pixi.js';
 import {
-  COLOR_BUTTON_GRADIENT_BOTTOM,
-  COLOR_BUTTON_GRADIENT_TOP,
   COLOR_BUTTON_TEXT,
-  COLOR_SUCCESS_GRADIENT_BOTTOM,
-  COLOR_SUCCESS_GRADIENT_TOP,
-  COLOR_SUCCESS_TEXT,
   LETTER_SCORES,
   SLOT_W,
   TILE_CLICK,
@@ -53,6 +48,11 @@ export default class Tile extends Button {
     this.letter = options.letter;
 
     this.createLetterValue();
+
+    // this.bg.tint = 0x38ff38;
+    // this.shadow.tint = 0x38ff38;
+    // this.text.tint = 0x38ff38;
+    // this.value.tint = 0x38ff38;
   }
 
   public animationEnter() {
@@ -151,15 +151,14 @@ export default class Tile extends Button {
         }
       });
 
+      // we'll update the text style once then flip this boolean
+      let textStyleChanged = false;
+
       anime({
         targets: {
-          topColor: COLOR_BUTTON_GRADIENT_TOP,
-          bottomColor: COLOR_BUTTON_GRADIENT_BOTTOM,
-          textColor: COLOR_BUTTON_TEXT
+          tint: '#ffffff'
         },
-        topColor: COLOR_SUCCESS_GRADIENT_TOP,
-        bottomColor: COLOR_SUCCESS_GRADIENT_BOTTOM,
-        textColor: COLOR_SUCCESS_TEXT,
+        tint: '#38ff38',
         duration: 1000,
         easing: 'linear',
         direction: 'alternate',
@@ -168,23 +167,10 @@ export default class Tile extends Button {
         update: (anim) => {
           const obj = anim.animatables[0].target as any;
 
-          this.applyBackground(
-            rgbFunctionToHex(obj.topColor),
-            rgbFunctionToHex(obj.bottomColor),
-            obj.textColor
-          );
-
-          this.applyShadow(rgbFunctionToHex(obj.textColor, true));
-
-          this.applyTextStyle(obj.textColor);
-
-          this.value.style = Object.assign({}, this.value.style, {
-            fill: obj.textColor
-          });
-        },
-
-        loopBegin: (anim) => {
-          // aanim.duration = 500;
+          this.bg.tint = rgbFunctionToHex(obj.tint, true);
+          this.shadow.tint = rgbFunctionToHex(obj.tint, true);
+          this.text.tint = rgbFunctionToHex(obj.tint, true);
+          this.value.tint = rgbFunctionToHex(obj.tint, true);
         }
       });
     });
