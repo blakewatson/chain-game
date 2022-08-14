@@ -12,3 +12,6 @@ build
 dist
 vendor
 ._*
+
+itch_chain
+itch_chain.zip

@@ -18,6 +18,8 @@
   },
   "scripts": {
     "build": "esbuild ts/app.ts --outfile=js/app.js --bundle --minify --target=es2017",
+    "itch": "npm run pack",
+    "pack": "sh scripts/pack_for_itch.sh",
     "watch": "esbuild ts/app.ts --outfile=js/app.js --bundle --servedir=. --serve=8989"
   },
   "keywords": [],

@@ -80,3 +80,19 @@ a {
     background-position: 0 0;
   }
 }
+
+/* -- Itch overrides -------------------------------- */
+
+html.itch {
+  background-color: #00ccff;
+}
+
+.itch body {
+  margin: 0;
+}
+
+.itch #app {
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}

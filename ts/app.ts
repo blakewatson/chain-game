@@ -42,8 +42,11 @@ function main(resources: Dict<LoaderResource>) {
 }
 
 async function getWordList() {
+  const wordListData = localStorage.getItem('chain-wordlist');
+
   if (
-    localStorage.getItem('chain-wordlist') &&
+    wordListData &&
+    wordListData !== '[]' &&
     localStorage.getItem('chain-wordlist-is-profanity-filtered')
   ) {
     return;
